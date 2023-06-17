@@ -251,7 +251,15 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
 
         )
 
-      ))
+      ),
+    
+    legend = list(orientation = 'h', 
+                  x=0.5, 
+                  y=-0.175, 
+                  #yref="container", 
+                  xanchor="center"
+                  )
+    )
 
 #fig
 
