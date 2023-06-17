@@ -201,6 +201,7 @@ if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings
 
 if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
 
+if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
 
 
 # Update fig to include variation icon and, if present, assurance icon
@@ -253,8 +254,8 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
           y=1.05,
          xanchor="right",
          yanchor="top",
-         sizex=0.1,
-         sizey=0.1
+         sizex=iconsettings_IconSize,
+         sizey=iconsettings_IconSize
         ) ,
 
          list(
@@ -266,8 +267,8 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
           y=1.05,
           xanchor="right",
           yanchor="top",
-          sizex=0.1,
-          sizey=0.1
+          sizex=iconsettings_IconSize,
+          sizey=iconsettings_IconSize
 
         )
 

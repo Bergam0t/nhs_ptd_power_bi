@@ -131,6 +131,20 @@
 }
 },
 
+"iconsettings": {
+  "displayName": "Icon Settings",
+  "description": "Icon size",
+  "properties": {
+    "IconSize": {
+      "displayName": "Icon Size",
+      "description": "Set Icon Size",
+      "type": {
+        "numeric": true
+      }
+    }
+}
+},
+
 
 
     "rcv_script": {

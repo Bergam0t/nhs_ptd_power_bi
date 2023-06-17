@@ -47,6 +47,9 @@ export class VisualSettings extends DataViewObjectsParser {
       public pointsettings: PointSettings = new PointSettings();
 
       public legendsettings: LegendSettings = new LegendSettings();
+
+      public iconsettings: IconSettings = new IconSettings();
+
     }
 
 
@@ -75,5 +78,11 @@ export class VisualSettings extends DataViewObjectsParser {
     export class LegendSettings {
 
       public LegendPosition: string = "below"
+
+    }
+
+    export class IconSettings {
+
+      public IconSize: number = 0.1;
 
     }
