@@ -47,18 +47,27 @@ ptd_spc_standard <- function(.data, options = NULL) {
     .data$facet <- .data[[facet_field]]
   }
 
+  
+  .data$y <- .data[[value_field]]
+  .data$x <- .data[[date_field]]
+  
   # Constants
   limit <- 2.66
   limitclose <- 2 * (limit / 3)
 
   # Restructure starting data frame
-  .data <- .data %>%
+  temp <- .data %>%
     select(
-      y = any_of(value_field),
-      x = any_of(date_field),
-      f = any_of("facet"),
-      rebase = any_of("rebase"),
-      trajectory = any_of("trajectory"),
+      # y = any_of(value_field),
+      # x = any_of(date_field),
+      # f = any_of("facet"),
+      # rebase = any_of("rebase"),
+      # trajectory = any_of("trajectory"),
+      y,
+      x,
+      f = facet,
+      rebase = rebase,
+      trajectory = trajectory,
     ) %>%
     # Group data frame by facet
     group_by(.data$f) %>%
@@ -97,6 +106,7 @@ ptd_spc_standard <- function(.data, options = NULL) {
       close_to_limits = !.data$outside_limits & (.data$y < .data$nlpl | .data$y > .data$nupl)
     ) %>%
     # clean up by removing columns that no longer serve a purpose and ungrouping data
-    select(-any_of(c("mr", "nlpl", "nupl", "amr", "rebase"))) %>%
+    #select(-any_of(c("mr", "nlpl", "nupl", "amr", "rebase"))) %>%
+    select(-c("mr", "nlpl", "nupl", "amr", "rebase")) %>%
     ungroup()
 }

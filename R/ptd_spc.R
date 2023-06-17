@@ -165,7 +165,9 @@ summary.ptd_spc_df <- function(object, ...) {
 
   s <- object %>%
     group_by(.data$f, .data$rebase_group) %>%
-    summarise(across(c("mean", "lpl", "upl"), first),
+   # summarise(across(c("mean", "lpl", "upl"), first),
+    mutate_at(c("mean", "lpl", "upl"), first) %>% 
+    summarise(
       n = n(),
       common_cause = n - sum(.data$special_cause_flag),
       special_cause_improvement = sum(.data$point_type == "special_cause_improvement"),

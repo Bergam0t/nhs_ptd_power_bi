@@ -1,3 +1,5 @@
+#setwd("H:/nhs_ptd_power_bi")
+
 # Import all required NHS R Plot the Dots scripts
 source('./r_files/flatten_HTML.r')
 source("./R/ptd_spc.R")
@@ -18,14 +20,19 @@ source("./R/ptd_spc_standard.R")
 ############### Library Declarations ###############
 libraryRequireInstall("plotly")
 libraryRequireInstall("dplyr")
+libraryRequireInstall("DT")
 ####################################################
 
 ################### Actual code ####################
-
 # 'Values' is the input received from PowerBI
 # Note that it seems a bit funny about the format dates are passed through in
 # TODO: Make date parsing more flexible - at the moment it will *only* work with yyyy-mm-dd 
 # (or possibly a very comprehensive mm-dd-yyyy, and that might depend on locale settings...) 
+
+# If testing, a sample dataset can be loaded from here (changing the path below the 
+# repository if necessary)
+# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_decrease_good_trending_lower_no_target.csv") %>%
+#           mutate(date = lubridate::dmy(date))
 
 dataset <- Values %>% 
     mutate(date = as.Date(date))
@@ -51,11 +58,14 @@ improvement_direction <- dataset %>%
   tail(1) %>% 
   select(improvement_direction) %>% 
   distinct() %>% 
-  pull()
+  pull() %>% 
+  # Force as character to appease the PBI service
+  as.character()
 
 
 # Generate NHS R making data count object
-ptd_object <- ptd_spc(dataset, value_field = "value",
+ptd_object <- ptd_spc(dataset, 
+        value_field = "value",
         date_field="date", 
         improvement_direction = improvement_direction,
         fix_after_n_points = baseline,
@@ -64,15 +74,24 @@ ptd_object <- ptd_spc(dataset, value_field = "value",
         ) %>% 
   # We want the underlying dataframe rather than the resulting plot
   # so convert to tibble
-  tibble() %>% 
+  as_tibble()
+
+
+
+#colnames() %>% stringr::str_replace("\\.","")
+
+
+ptd_object <- ptd_object %>% 
   # Tweak point type text for nicer display
   mutate(point_type = case_when(
     point_type == "special_cause_concern" ~ "Special Cause - Concern",
     point_type == "special_cause_improvement" ~ "Special Cause - Improvement",
     point_type == "common_cause" ~ "Common Cause",
     TRUE ~ "ERROR - CHECK"
-  ))
-
+  )) 
+  
+# p <- ptd_object %>%
+#      DT::datatable()
 
 # Set up palette using NHS identity colours for point types
 # TODO: add in support for neutral variation
@@ -81,8 +100,8 @@ palette <- c("Special Cause - Concern" = "#ED8B00",
              "Common Cause" = "#768692")
 
 # Initialise the plotly figure
-fig <- plot_ly(ptd_object, 
-               x = ~x, 
+fig <- plot_ly(ptd_object,
+               x = ~x,
                colors = palette)
 
 fig <- fig %>%
@@ -90,49 +109,48 @@ fig <- fig %>%
   add_trace(y = ~y, name = 'trace 0',
             type="scatter",
             mode = 'lines', line=list(color='#768692'),
-            showlegend=FALSE) %>% 
+            showlegend=FALSE) %>%
   # Add in markers for the data, colouring by the point types
   # and using the palette we passed when initialising the figure
-  add_trace(y = ~y, 
+  add_trace(y = ~y,
             type="scatter",
             mode = 'markers', color = ~point_type
-) %>% 
+) %>%
   # Add in line for lower process limit
   add_trace(y = ~lpl, name = 'Lower Process Limit',
             type="scatter",
             mode = 'lines', line=list(color='#231f20', dash="dot"),
-            showlegend=FALSE) %>% 
+            showlegend=FALSE) %>%
   # Add in line for upper process limit
   add_trace(y = ~upl, name = 'Upper Process Limit',
             type="scatter",
             mode = 'lines', line=list(color='#231f20', dash="dot"),
-            showlegend=FALSE) %>% 
+            showlegend=FALSE) %>%
   # Add in line for mean
   # TODO: Investigate whether this should be median. Median doesn't appear in plot
-  # but I thought that was MDC methodology - I'm probably misremembering. 
+  # but I thought that was MDC methodology - I'm probably misremembering.
   add_trace(y = ~mean, name = 'Mean',
             type="scatter",
             mode = 'lines', line=list(color='#231f20'),
-            showlegend=FALSE)  
+            showlegend=FALSE)
 
-# If a target is provided, add in a line for the target  
+# If a target is provided, add in a line for the target
 if (!is.null(target)) {
-  fig <- fig %>% 
+  fig <- fig %>%
     add_trace(y = ~target, name = 'Target',
               type="scatter",
               mode = 'lines', line=list(color='#DA291C', dash="dot"),
-              showlegend=FALSE)  
-  
+              showlegend=FALSE)
 }
 
 # Calculate variation type by looking at final point in ptd object
-variation_type <- ptd_object %>% 
-  tail(1) %>% 
-  select(point_type) %>% 
+variation_type <- ptd_object %>%
+  tail(1) %>%
+  select(point_type) %>%
   pull()
 
 # Get variation image paths
-# Variation image relies on both the value of the most recent point 
+# Variation image relies on both the value of the most recent point
 # and the direction that is counted as improvement
 # Improvement direction was calculated earlier to pass to ptd arguments
 # TODO: Add in support for 'neutral' improvement direction
@@ -147,7 +165,7 @@ if(variation_type == "Common Cause") variation_image <- "https://raw.githubuserc
 # NHS R PTD package provides a helper function for calculating this from the PTD object
 if (!is.null(target)) {
 
-assurance_type <- ptd_calculate_assurance_type(ptd_object) %>% select(assurance_type) %>% pull()
+assurance_type <- ptd_calculate_assurance_type_2(ptd_object, improvement_direction) %>% select(assurance_type) %>% pull()
 
 if(assurance_type == "inconsistent") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/inconsistent.svg"
 if(assurance_type =="consistent_pass") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/pass.svg"
@@ -167,22 +185,22 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
 
 # Update fig to include variation icon and, if present, assurance icon
 # Also pass in user parameters from the PBI visual formatting options for titles
-  fig <- fig %>% 
-    layout( 
-      
+  fig <- fig %>%
+    layout(
+
     xaxis = list(title = xaxissettings_XAxisTitle),
     yaxis = list(title = yaxissettings_YAxisTitle),
 
 
-      title=list(text=titlesettings_ChartTitle, 
-                 font=list(size=titlesettings_TitleSize), 
-                 automargin=TRUE, 
+      title=list(text=titlesettings_ChartTitle,
+                 font=list(size=titlesettings_TitleSize),
+                 automargin=TRUE,
                  yref='container',
                  yanchor =  'top'
                  ),
 
       # Add in icons for variation and, if target present, assurance
-      # Note that assurance will not always be present, so place variation icon 
+      # Note that assurance will not always be present, so place variation icon
       # in the far left top hand corner and assurance to the right of it if present
       # Try to get these as far out of the way as possible
       # TODO: add in user options for icon placement
@@ -191,53 +209,53 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
       # https://plotly.com/r/reference/layout/images/
       # https://plotly.com/r/images/
 
-      # TODO: Work out how to add a tooltip explaining the meaning of the icons on hover. 
+      # TODO: Work out how to add a tooltip explaining the meaning of the icons on hover.
       # From docs, doesn't appear to be something we can add directly to the images
-      # Think we will need an invisible point where the images are 
-      # but this could be tricky to achieve because of the way the image locations 
-      # and sizes are set. 
+      # Think we will need an invisible point where the images are
+      # but this could be tricky to achieve because of the way the image locations
+      # and sizes are set.
 
       # TODO: Have not yet verified whether the images work when visual is running on
-      # PBI service rather than PBI desktop. Plotly seems to only accept images from web source, 
+      # PBI service rather than PBI desktop. Plotly seems to only accept images from web source,
       # but I worry that PBI service will block these requests. Note to self - would base64
       # encoding of the images work if required? Or look into plotly source code at what
       # exactly is happening at this step - what aspect of it being 'on the web' is crucial?
-      # Because we can include additional assets in the pbi visual package so I don't think 
-      # that's an issue. 
+      # Because we can include additional assets in the pbi visual package so I don't think
+      # that's an issue.
 
-      images = list(  
-        
-        list(  
+      images = list(
+
+        list(
           source =  assurance_image,
-          xref="paper", 
-          yref="paper", 
-          x=0.22, 
-          y=1.05, 
-         xanchor="right", 
+          xref="paper",
+          yref="paper",
+          x=0.22,
+          y=1.05,
+         xanchor="right",
          yanchor="top",
-         sizex=0.1, 
+         sizex=0.1,
          sizey=0.1
         ) ,
 
-         list(  
-          
+         list(
+
           source =  variation_image,
-          xref="paper", 
-          yref="paper", 
-          x=0.1, 
-          y=1.05, 
-          xanchor="right", 
+          xref="paper",
+          yref="paper",
+          x=0.1,
+          y=1.05,
+          xanchor="right",
           yanchor="top",
-          sizex=0.1, 
+          sizex=0.1,
           sizey=0.1
-          
-        )   
-        
-      )) 
-  
+
+        )
+
+      ))
+
 #fig
 
-####################################################
+# ####################################################
 
 ############# Create and save widget ###############
 p <- fig
