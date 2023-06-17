@@ -45,7 +45,9 @@ export class VisualSettings extends DataViewObjectsParser {
       public yaxissettings: YAxisSettings = new YAxisSettings();
 
       public pointsettings: PointSettings = new PointSettings();
-}
+
+      public legendsettings: LegendSettings = new LegendSettings();
+    }
 
 
     // export class rcv_scriptSettings {
@@ -68,4 +70,10 @@ export class VisualSettings extends DataViewObjectsParser {
 
     export class PointSettings {
       public PointSize: number = 8;
+    }
+
+    export class LegendSettings {
+
+      public LegendPosition: string = "below"
+
     }

@@ -102,6 +102,9 @@ palette <- c("Special Cause - Concern" = "#ED8B00",
 
 if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
 
+if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "bottom"
+
+if (legendsettings_LegendPosition == "off") showLegend <- FALSE else showLegend <- TRUE
 
 # Initialise the plotly figure
 fig <- plot_ly(ptd_object,
@@ -122,6 +125,7 @@ fig <- fig %>%
             type="scatter",
             mode = 'markers', 
             color = ~point_type, 
+            showlegend=showLegend,
             marker=list(size=pointsettings_PointSize)
 ) %>%
   # Add in line for lower process limit
@@ -267,9 +271,13 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
 
         )
 
-      ),
-    
-    legend = list(orientation = 'h', 
+      )
+    )
+  
+  if (legendsettings_LegendPosition == "below") {
+  
+    fig <- fig %>%
+      layout(legend = list(orientation = 'h', 
                   x=0.5, 
                   y=-0.175, 
                   #yref="container", 
@@ -277,6 +285,8 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
                   itemsizing="constant"
                   )
     )
+
+}
 
 #fig
 

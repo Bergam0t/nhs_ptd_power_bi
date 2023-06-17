@@ -104,6 +104,33 @@
 }
 },
 
+"legendsettings": {
+  "displayName": "Legend Settings",
+  "description": "Legend position",
+  "properties": {
+    "LegendPosition": {
+      "displayName": "Legend position",
+      "description": "Set legend position or turn legend off",
+      "type": {
+        "enumeration": [
+          {
+            "displayName": "Below",
+            "value": "below"
+          },
+          {
+            "displayName": "Right",
+            "value": "right"
+          },
+          {
+            "displayName": "Off",
+            "value": "off"
+          }
+        ]
+      }
+    }
+}
+},
+
 
 
     "rcv_script": {
