@@ -43,6 +43,8 @@ export class VisualSettings extends DataViewObjectsParser {
       public xaxissettings: XAxisSettings = new XAxisSettings();
 
       public yaxissettings: YAxisSettings = new YAxisSettings();
+
+      public pointsettings: PointSettings = new PointSettings();
 }
 
 
@@ -62,4 +64,8 @@ export class VisualSettings extends DataViewObjectsParser {
 
     export class YAxisSettings {
       public YAxisTitle: string = "";
+    }
+
+    export class PointSettings {
+      public PointSize: number = 8;
     }

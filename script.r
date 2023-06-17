@@ -99,6 +99,10 @@ palette <- c("Special Cause - Concern" = "#ED8B00",
              "Special Cause - Improvement" = "#41B6E6",
              "Common Cause" = "#768692")
 
+
+if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
+
+
 # Initialise the plotly figure
 fig <- plot_ly(ptd_object,
                x = ~x,
@@ -106,32 +110,41 @@ fig <- plot_ly(ptd_object,
 
 fig <- fig %>%
   # Add the main line for the data
-  add_trace(y = ~y, name = 'trace 0',
+  add_trace(y = ~y, 
+            name = 'trace 0',
             type="scatter",
-            mode = 'lines', line=list(color='#768692'),
+            mode = 'lines', 
+            line=list(color='#768692'),
             showlegend=FALSE) %>%
   # Add in markers for the data, colouring by the point types
   # and using the palette we passed when initialising the figure
   add_trace(y = ~y,
             type="scatter",
-            mode = 'markers', color = ~point_type
+            mode = 'markers', 
+            color = ~point_type, 
+            marker=list(size=pointsettings_PointSize)
 ) %>%
   # Add in line for lower process limit
-  add_trace(y = ~lpl, name = 'Lower Process Limit',
+  add_trace(y = ~lpl, 
+            name = 'Lower Process Limit',
             type="scatter",
-            mode = 'lines', line=list(color='#231f20', dash="dot"),
+            mode = 'lines', 
+            line=list(color='#231f20', dash="dot"),
             showlegend=FALSE) %>%
   # Add in line for upper process limit
-  add_trace(y = ~upl, name = 'Upper Process Limit',
+  add_trace(y = ~upl, 
+            name = 'Upper Process Limit',
             type="scatter",
-            mode = 'lines', line=list(color='#231f20', dash="dot"),
+            mode = 'lines', 
+            line=list(color='#231f20', dash="dot"),
             showlegend=FALSE) %>%
   # Add in line for mean
   # TODO: Investigate whether this should be median. Median doesn't appear in plot
   # but I thought that was MDC methodology - I'm probably misremembering.
   add_trace(y = ~mean, name = 'Mean',
             type="scatter",
-            mode = 'lines', line=list(color='#231f20'),
+            mode = 'lines', 
+            line=list(color='#231f20'),
             showlegend=FALSE)
 
 # If a target is provided, add in a line for the target
@@ -139,7 +152,8 @@ if (!is.null(target)) {
   fig <- fig %>%
     add_trace(y = ~target, name = 'Target',
               type="scatter",
-              mode = 'lines', line=list(color='#DA291C', dash="dot"),
+              mode = 'lines', 
+              line=list(color='#DA291C', dash="dot"),
               showlegend=FALSE)
 }
 
@@ -182,6 +196,8 @@ if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_Ti
 if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
 
 if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
+
+
 
 # Update fig to include variation icon and, if present, assurance icon
 # Also pass in user parameters from the PBI visual formatting options for titles
@@ -257,7 +273,8 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
                   x=0.5, 
                   y=-0.175, 
                   #yref="container", 
-                  xanchor="center"
+                  xanchor="center",
+                  itemsizing="constant"
                   )
     )
 

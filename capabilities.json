@@ -90,6 +90,20 @@
   }
 },
 
+"pointsettings": {
+  "displayName": "Point Settings",
+  "description": "Point size",
+  "properties": {
+    "PointSize": {
+      "displayName": "Point Size",
+      "description": "Set Point Size",
+      "type": {
+        "numeric": true
+      }
+    }
+}
+},
+
 
 
     "rcv_script": {
