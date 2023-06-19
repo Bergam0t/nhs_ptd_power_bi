@@ -306,65 +306,102 @@ if (outputtypesettings_OutputType == "graph") {
     
     b = 10,
     
-    t = 150,
+    t = 10,
     
     pad = 4
     
   )
   
-  fig <- fig %>% 
-    layout(images = list(
-    
-    list(
-      source =  assurance_image,
-      xref="container",
-      yref="container",
-      x=0.8,
-      y=1.45,
-      xanchor="center",
-      yanchor="top",
-      sizex=iconsettings_IconSize*2,
-      sizey=iconsettings_IconSize*2
-    ) ,
-    
-    list(
+  fig_plot <- fig %>% 
+    layout(
       
-      source =  variation_image,
-      xref="container",
-      yref="container",
-      x=0.2,
-      y=1.45,
-      xanchor="center",
-      yanchor="top",
-      sizex=iconsettings_IconSize*2,
-      sizey=iconsettings_IconSize*2
-      
-    )
-    
-    
-    
-    ),
    margin=m,
    
    xaxis = list(title = "", showticklabels=FALSE, showgrid=FALSE),
+   
    yaxis = list(title = "", showticklabels=FALSE, showgrid=FALSE,
-                zerolinecolor = '#ffff'),
+                zerolinecolor = '#ffff')#,
    
    
-   title=list(text=titlesettings_ChartTitle,
-              font=list(size=titlesettings_TitleSize*3),
-              automargin=TRUE,
-              yref='container',
-              yanchor = 'top',
-              y=0.95
-   )
+
   
     ) %>% 
     config(displayModeBar = FALSE)
+ 
+  
+  # Create figure that is icons
+  m2 <- list(
     
+    l = 0,
+    
+    r = 0,
+    
+    b = 0,
+    
+    t = 0,
+    
+    pad = 0
+    
+  )
+  
+  fig_icons <- plotly_empty() %>% 
+    layout(
+    images = list(
+      
+      list(
+        source =  assurance_image,
+        xref="paper",
+        yref="paper",
+        x=0.8,
+        y=0.5,
+        xanchor="center",
+        yanchor="top",
+        sizex=iconsettings_IconSize*5,
+        sizey=iconsettings_IconSize*5
+      ) ,
+      
+      list(
+        
+        source =  variation_image,
+        xref="paper",
+        yref="paper",
+        x=0.2,
+        y=0.5,
+        xanchor="center",
+        yanchor="top",
+        sizex=iconsettings_IconSize*5,
+        sizey=iconsettings_IconSize*5
+        
+      )
+    ),
+    margin=m2
+    ) %>% 
+    config(displayModeBar = FALSE)
+  
+  # Create figure that is title
+  fig_title <- plotly_empty() %>% 
+    layout(
+      title=list(text=titlesettings_ChartTitle,
+                 font=list(size=titlesettings_TitleSize*3),
+                 #automargin=TRUE,
+                 yref='paper',
+                 yanchor = 'top',
+                 y=0.75
+      ),
+      
+      margin=m2
+
+    ) %>% 
+    config(displayModeBar = FALSE)
+  
+  # Join as subplots
+  
+  fig <- subplot(fig_title, fig_icons, fig_plot, 
+                 nrows = 3, heights = c(0.2, 0.6, 0.2))
+     
 }
 
-#fig
+#fig1
   
   
   
