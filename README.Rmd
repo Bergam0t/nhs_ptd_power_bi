@@ -21,6 +21,8 @@ This is a custom visual for PowerBI to allow the generation of statistical proce
 
 ![](man/figures/README-example-powerbi-rebase.png)
 
+**!! At the moment this only works in the PowerBI desktop application - while this may be useful for automating the reporting of some KPIs as it is possible to export the resulting files to PDF, work is ongoing to make this visual work in the PowerBI service so it can be used more widely within organisations !!**
+
 All calculations feeding into the visual are powered by R code written by package is built by the [NHS-R community](https://nhsrcommunity.com) in the NHSRplotthedots package.
 
 This visual, like the R package, supports the NHSE/I programme ['Making Data Count'](https://www.england.nhs.uk/publication/making-data-count/), and allows users to draw XmR charts, use change points, and apply rules with summary indicators for when rules are breached.
@@ -46,7 +48,7 @@ At present, the input format is very restrictive and expects **all** of the foll
 | what                                                                                              | improvement_direction                                                                                                                                                                | date                          | value         | recalc_here                                                                                                            | comment                                                                                      | baseline_duration                                                                                                                                                   | target                                                                                                                  |
 |---------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|---------------|------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
 | *Identifier for the data. Not currently used but in future may be used to set the default title.* | **increase** or **decrease** are the only accepted options here at present - 'neutral' to be added at a later date. Must be the same for the whole dataset but include in every row. | Date in the format yyyy-mm-dd | numeric value | MAY BE BLANK. Any of 'y', 'Y', 'yes', 'Yes' or 'YES' will make the package recalculate the process limits at this row. | MAY BE BLANK. Not currently used, but in future will be used to add annotations to the plot. | MAY BE BLANK. Sets the number of points that will be used to calculate the baseline. If included, must be the same for the whole dataset and included in every row. | MAY BE BLANK. Set a target for the plot. If included, must be the same for the whole dataset and included in every row. |
-| KPI-309 Number of Clients Seen in Month                                                           |  increase                                                                                                                                                                            | 2021-05-31                    | 14            | y                                                                                                                      | Remodelled system                                                                            | 15                                                                                                                                                                  | 30                                                                                                                      |
+| KPI-309 Number of Clients Seen in Month                                                           | increase                                                                                                                                                                             | 2021-05-31                    | 14            | y                                                                                                                      | Remodelled system                                                                            | 15                                                                                                                                                                  | 30                                                                                                                      |
 
 Example datasets are given in **sample_datasets/**
 
@@ -67,6 +69,28 @@ The plot title and size, y axis title and x axis title can be set using the 'vis
 Some additional options are available from PowerBI by clicking on 'general' within this menu. Depending on your version of PowerBI this will allow you to add extra titles, subtitles, a heading colour and an outline.
 
 ![](man/figures/README-example-powerbi-formatting.png)
+
+## KPI Card
+
+From the 'Output Options', select 'Card' to get a KPI card like the one below.
+
+Various options exist to allow you to tweak the positioning of the MDC icons.
+
+![](man/figures/README-example-kpi-card.png)
+
+## KPI Matrix
+
+If passing multiple KPIs, from the 'Output Options' select 'Summary Matrix' to get a table like the one below.
+
+This quickly summarises multiple KPIs, with the KPIs in the top left corner generally being of most concern to decision-makers.
+
+![](man/figures/README-example-kpi-matrix.png)
+
+## KPI Summary Table
+
+If passing multiple KPIs, from the 'Output Options' select 'Summary Table' to get a table like the one below.
+
+![](man/figures/README-example-kpi-summary.png)
 
 # Information for Collaborators
 
