@@ -31,181 +31,358 @@ libraryRequireInstall("DT")
 
 # If testing, a sample dataset can be loaded from here (changing the path below the 
 # repository if necessary)
+# Double rebase
 # Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_double_rebase_increase_good_trending_higher_inconsistent.csv") %>%
 #           mutate(date = lubridate::dmy(date))
+# More than one KPI
+# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_multiple_areas_double_rebase_increase.csv") %>%
+#           mutate(date = lubridate::dmy(date))
+# Lots of KPIs
+# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_10_areas.csv") %>%
+#           mutate(date = lubridate::dmy(date))
+
+
+
 
 dataset <- Values %>% 
     mutate(date = as.Date(date))
 
-# Extract option for baseline length
-# Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
-# We need the true null as then this means we will get the default behaviour of the ptd function
-# if nothing is passed by the user
-if(is.na(unique(dataset$baseline_duration))) baseline <- NULL else baseline <- unique(dataset$baseline_duration)
-
-# Extract rebase points (if included) - if none passed, return NULL so that we get default ptd behaviour 
-if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) rebase_points <- NULL else rebase_points <- (dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase()
-
-# Get any target values (if included)
-# If present, pass through to ptd target function
-if(is.na(unique(dataset$target))) target <- NULL else target <- unique(dataset$target) %>% ptd_target()
-
-# Take improvement direction from where it is specified in original dataframe
-# TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
-# My current thinking is that while dataframe is inefficient for storage, it's far more efficient for creating 
-# a lot of visuals at once 
-improvement_direction <- dataset %>% 
-  tail(1) %>% 
-  select(improvement_direction) %>% 
-  distinct() %>% 
-  pull() %>% 
-  # Force as character to appease the PBI service
-  as.character()
-
-
-# Generate NHS R making data count object
-ptd_object <- ptd_spc(dataset, 
-        value_field = "value",
-        date_field="date", 
-        improvement_direction = improvement_direction,
-        fix_after_n_points = baseline,
-        rebase = rebase_points,
-        target = target
-        ) %>% 
-  # We want the underlying dataframe rather than the resulting plot
-  # so convert to tibble
-  as_tibble()
-
-
-
-#colnames() %>% stringr::str_replace("\\.","")
-
-
-ptd_object <- ptd_object %>% 
-  # Tweak point type text for nicer display
-  mutate(point_type = case_when(
-    point_type == "special_cause_concern" ~ "Special Cause - Concern",
-    point_type == "special_cause_improvement" ~ "Special Cause - Improvement",
-    point_type == "common_cause" ~ "Common Cause",
-    TRUE ~ "ERROR - CHECK"
-  )) 
-  
-# p <- ptd_object %>%
-#      DT::datatable()
-
-# Set up palette using NHS identity colours for point types
-# TODO: add in support for neutral variation
-palette <- c("Special Cause - Concern" = "#ED8B00",
-             "Special Cause - Improvement" = "#41B6E6",
-             "Common Cause" = "#768692")
-
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
-if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
+if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputType == "summarymatrix") {
+  
+  
+  ptd_objects <- list()
+  
+  for (what in 1:nrow(dataset %>% distinct(what))) { 
+  
+  what_item <- (dataset %>% distinct(what) %>% pull())[[what]]
+    
+  single_what <- dataset %>% 
+    filter(what == what_item) 
+    
+    
+  # Extract option for baseline length
+  # Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
+  # We need the true null as then this means we will get the default behaviour of the ptd function
+  # if nothing is passed by the user
+  if(is.na(unique(single_what$baseline_duration))) baseline <- NULL else baseline <- unique(single_what$baseline_duration)
+  
+  # Extract rebase points (if included) - if none passed, return NULL so that we get default ptd behaviour 
+  if((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) rebase_points <- NULL else rebase_points <- (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase()
+  
+  # Get any target values (if included)
+  # If present, pass through to ptd target function
+  if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
+  
+  # Take improvement direction from where it is specified in original dataframe
+  # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
+  # My current thinking is that while dataframe is inefficient for storage, it's far more efficient for creating 
+  # a lot of visuals at once 
+  improvement_direction <- single_what %>% 
+    tail(1) %>% 
+    select(improvement_direction) %>% 
+    distinct() %>% 
+    pull() %>% 
+    # Force as character to appease the PBI service
+    as.character()
+  
+  
+  # Generate NHS R making data count object
+  ptd_df <- ptd_spc(single_what, 
+                        value_field = "value",
+                        date_field="date", 
+                        improvement_direction = improvement_direction,
+                        fix_after_n_points = baseline,
+                        rebase = rebase_points,
+                        target = target
+  ) %>% 
+    # We want the underlying dataframe rather than the resulting plot
+    # so convert to tibble
+    as_tibble() %>% 
+    # Tweak point type text for nicer display
+    mutate(point_type = case_when(
+      point_type == "special_cause_concern" ~ "Special Cause - Concern",
+      point_type == "special_cause_improvement" ~ "Special Cause - Improvement",
+      point_type == "common_cause" ~ "Common Cause",
+      TRUE ~ "ERROR - CHECK"
+    )) 
+  
+  
+  if (!is.na(ptd_df %>% distinct(target) %>% pull())) assurance_type <- ptd_calculate_assurance_type_2(ptd_df, improvement_direction) %>% select(assurance_type) %>% pull() else assurance_type <- ""
+  
+  final_row <- ptd_df %>% arrange(x) %>% tail(1)
+    
+  ptd_objects[[what]] <- tibble(
+    What = what_item,
+    `Most Recent Data Point` =  final_row %>% pull(x),
+    `Most Recent Value` =  final_row %>% pull(y),
+    Mean = final_row %>% pull(mean),
+    `Lower Process Limit` = final_row %>% pull(lpl),
+    `Upper Process Limit` = final_row %>% pull(upl),
+    `Target` = final_row %>% pull(target),
+    `Variation` = final_row %>% pull(point_type),
+    `Assurance` = assurance_type 
+    
+    
+  ) %>% 
+    mutate(Assurance = case_when(
+      
+      Assurance == "consistent_pass" ~ "Consistently Meeting Target",
+      Assurance == "inconsistent" ~ "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target",
+      Assurance == "consistent_fail" ~ "Consistently Failing to Meet Target",
+      Assurance == "" ~ "No Target",
+      TRUE ~ "ERROR - Check"
+      
+    ))
+  
+  }
+  
+  ptd_summary_table <- ptd_objects %>% 
+    bind_rows() 
+  
+ 
+}
 
-if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "bottom"
+if (outputtypesettings_OutputType == "summarytable") {
+  
+  fig <- ptd_summary_table %>% 
+    mutate_if(is.numeric, round, 1) %>%
+    mutate(`Most Recent Data Point` = `Most Recent Data Point` %>% format("%d %b %Y")) %>% 
+    mutate(Variation = as.factor(Variation),
+           Assurance = as.factor(Assurance)) %>% 
+    DT::datatable(filter='top', 
+                  rownames = FALSE,
+                  fillContainer = FALSE,
+                  autoHideNavigation = FALSE,
+                  #options=list(scrollY = "100px")
+                  )
+  
+}
 
-if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
+if (outputtypesettings_OutputType == "summarymatrix") {
+  
+  one_of_each_variation <- c("Special Cause - Concern", "Common Cause", "Special Cause - Improvement")
+  one_of_each_assurance <- c("Consistently Failing to Meet Target", 
+                              "No Target", 
+                              "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target",
+                              "Consistently Meeting Target")
+  
+  summary_matrix <- ptd_summary_table %>% 
+    select(What, Variation, Assurance) %>%
+    # Wonky temporary workaround to ensure every column exists without having to do lots of 'exists' checks
+    union_all(one_of_each_variation %>% as_tibble() %>% rename(Variation = value)) %>% 
+    union_all(one_of_each_assurance %>% as_tibble() %>% rename(Assurance = value))  %>% 
+    mutate(Variation = factor(Variation, 
+                              levels=c("Special Cause - Concern", "Common Cause", "Special Cause - Improvement"))) %>% 
+    arrange(Variation) %>% 
+    group_by(Variation, Assurance) %>%
+    summarise(Result=paste(What, collapse='<br/><br/>')) %>%
+    ungroup() %>% 
+    tidyr::spread(key=Variation, value=Result)  %>% 
+    filter(!is.na(Assurance)) %>% 
+    select(-`<NA>`) %>% 
+    mutate(Assurance = factor(Assurance, 
+                              levels=c("Consistently Failing to Meet Target", 
+                                       "No Target", 
+                                       "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target",
+                                       "Consistently Meeting Target"))) %>% 
+    arrange(Assurance) %>%  
+    rename(` ` = `Assurance`) 
+  
+  
+  # Create any missing columns
+  
+  
+  fig <- summary_matrix %>%
+    DT::datatable(filter='none', 
+                  escape=FALSE,
+                  rownames = FALSE,
+                  autoHideNavigation = FALSE,
+                  fillContainer = TRUE,
+                  options = list(
+                    dom = 'Brt', scrollY = "200px"
+                  )
+                  )%>% 
+    DT::formatStyle(columns = c(" "), fontWeight = 'bold', `text-align` = 'left')
 
-# Initialise the plotly figure
-fig <- plot_ly(ptd_object,
-               x = ~x,
-               colors = palette)
+  
+  
+}
 
-fig <- fig %>%
-  # Add the main line for the data
-  add_trace(y = ~y, 
-            name = 'trace 0',
-            type="scatter",
-            mode = 'lines', 
-            line=list(color='#768692'),
-            showlegend=FALSE) %>%
-  # Add in markers for the data, colouring by the point types
-  # and using the palette we passed when initialising the figure
-  add_trace(y = ~y,
-            type="scatter",
-            mode = 'markers', 
-            color = ~point_type, 
-            showlegend=showLegend,
-            marker=list(size=pointsettings_PointSize)
-) %>%
-  # Add in line for lower process limit
-  add_trace(y = ~lpl, 
-            name = 'Lower Process Limit',
-            type="scatter",
-            mode = 'lines', 
-            line=list(color='#231f20', dash="dot"),
-            showlegend=FALSE) %>%
-  # Add in line for upper process limit
-  add_trace(y = ~upl, 
-            name = 'Upper Process Limit',
-            type="scatter",
-            mode = 'lines', 
-            line=list(color='#231f20', dash="dot"),
-            showlegend=FALSE) %>%
-  # Add in line for mean
-  # TODO: Investigate whether this should be median. Median doesn't appear in plot
-  # but I thought that was MDC methodology - I'm probably misremembering.
-  add_trace(y = ~mean, name = 'Mean',
-            type="scatter",
-            mode = 'lines', 
-            line=list(color='#231f20'),
-            showlegend=FALSE)
 
-# If a target is provided, add in a line for the target
-if (!is.null(target)) {
+if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == "card") {
+
+  # Extract option for baseline length
+  # Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
+  # We need the true null as then this means we will get the default behaviour of the ptd function
+  # if nothing is passed by the user
+  if(is.na(unique(dataset$baseline_duration))) baseline <- NULL else baseline <- unique(dataset$baseline_duration)
+  
+  # Extract rebase points (if included) - if none passed, return NULL so that we get default ptd behaviour 
+  if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) rebase_points <- NULL else rebase_points <- (dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase()
+  
+  # Get any target values (if included)
+  # If present, pass through to ptd target function
+  if(is.na(unique(dataset$target))) target <- NULL else target <- unique(dataset$target) %>% ptd_target()
+  
+  # Take improvement direction from where it is specified in original dataframe
+  # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
+  # My current thinking is that while dataframe is inefficient for storage, it's far more efficient for creating 
+  # a lot of visuals at once 
+  improvement_direction <- dataset %>% 
+    tail(1) %>% 
+    select(improvement_direction) %>% 
+    distinct() %>% 
+    pull() %>% 
+    # Force as character to appease the PBI service
+    as.character()
+  
+  
+  # Generate NHS R making data count object
+  ptd_object <- ptd_spc(dataset, 
+          value_field = "value",
+          date_field="date", 
+          improvement_direction = improvement_direction,
+          fix_after_n_points = baseline,
+          rebase = rebase_points,
+          target = target
+          ) %>% 
+    # We want the underlying dataframe rather than the resulting plot
+    # so convert to tibble
+    as_tibble()
+  
+  
+  
+  #colnames() %>% stringr::str_replace("\\.","")
+  
+  
+  ptd_object <- ptd_object %>% 
+    # Tweak point type text for nicer display
+    mutate(point_type = case_when(
+      point_type == "special_cause_concern" ~ "Special Cause - Concern",
+      point_type == "special_cause_improvement" ~ "Special Cause - Improvement",
+      point_type == "common_cause" ~ "Common Cause",
+      TRUE ~ "ERROR - CHECK"
+    )) 
+    
+  # p <- ptd_object %>%
+  #      DT::datatable()
+  
+  # Set up palette using NHS identity colours for point types
+  # TODO: add in support for neutral variation
+  palette <- c("Special Cause - Concern" = "#ED8B00",
+               "Special Cause - Improvement" = "#41B6E6",
+               "Common Cause" = "#768692")
+  
+  
+  
+  
+  if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
+  
+  if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "bottom"
+  
+  if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
+  
+  # Initialise the plotly figure
+  fig <- plot_ly(ptd_object,
+                 x = ~x,
+                 colors = palette)
+  
   fig <- fig %>%
-    add_trace(y = ~target, name = 'Target',
+    # Add the main line for the data
+    add_trace(y = ~y, 
+              name = 'trace 0',
               type="scatter",
               mode = 'lines', 
-              line=list(color='#DA291C', dash="dot"),
+              line=list(color='#768692'),
+              showlegend=FALSE) %>%
+    # Add in markers for the data, colouring by the point types
+    # and using the palette we passed when initialising the figure
+    add_trace(y = ~y,
+              type="scatter",
+              mode = 'markers', 
+              color = ~point_type, 
+              showlegend=showLegend,
+              marker=list(size=pointsettings_PointSize)
+  ) %>%
+    # Add in line for lower process limit
+    add_trace(y = ~lpl, 
+              name = 'Lower Process Limit',
+              type="scatter",
+              mode = 'lines', 
+              line=list(color='#231f20', dash="dot"),
+              showlegend=FALSE) %>%
+    # Add in line for upper process limit
+    add_trace(y = ~upl, 
+              name = 'Upper Process Limit',
+              type="scatter",
+              mode = 'lines', 
+              line=list(color='#231f20', dash="dot"),
+              showlegend=FALSE) %>%
+    # Add in line for mean
+    # TODO: Investigate whether this should be median. Median doesn't appear in plot
+    # but I thought that was MDC methodology - I'm probably misremembering.
+    add_trace(y = ~mean, name = 'Mean',
+              type="scatter",
+              mode = 'lines', 
+              line=list(color='#231f20'),
               showlegend=FALSE)
+  
+  # If a target is provided, add in a line for the target
+  if (!is.null(target)) {
+    fig <- fig %>%
+      add_trace(y = ~target, name = 'Target',
+                type="scatter",
+                mode = 'lines', 
+                line=list(color='#DA291C', dash="dot"),
+                showlegend=FALSE)
+  }
+  
+  # Calculate variation type by looking at final point in ptd object
+  variation_type <- ptd_object %>%
+    tail(1) %>%
+    select(point_type) %>%
+    pull()
+  
+  # Get variation image paths
+  # Variation image relies on both the value of the most recent point
+  # and the direction that is counted as improvement
+  # Improvement direction was calculated earlier to pass to ptd arguments
+  # TODO: Add in support for 'neutral' improvement direction
+  if(variation_type == "Special Cause - Concern" & improvement_direction == "decrease") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_high.svg"
+  if(variation_type == "Special Cause - Concern" & improvement_direction == "increase") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_low.svg"
+  if(variation_type == "Special Cause - Improvement" & improvement_direction == "decrease") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_low.svg"
+  if(variation_type == "Special Cause - Improvement" & improvement_direction == "increase") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_high.svg"
+  if(variation_type == "Common Cause") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/common_cause.svg"
+  
+  
+  # Get assurance image paths
+  # NHS R PTD package provides a helper function for calculating this from the PTD object
+  if (!is.null(target)) {
+  
+  assurance_type <- ptd_calculate_assurance_type_2(ptd_object, improvement_direction) %>% select(assurance_type) %>% pull()
+  
+  if(assurance_type == "inconsistent") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/inconsistent.svg"
+  if(assurance_type =="consistent_pass") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/pass.svg"
+  if(assurance_type == "consistent_fail") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/fail.svg"
+  
+  }
+  
+  if (is.null(target)) assurance_image <- ""
+  
+  # Get settings from power bi visual formatting options
+  if(exists("titlesettings_ChartTitle")) titlesettings_ChartTitle <- titlesettings_ChartTitle else titlesettings_ChartTitle <- ""
+  if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
+  if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
+  
+  if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
+  
+  if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
+  
+  if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
 }
-
-# Calculate variation type by looking at final point in ptd object
-variation_type <- ptd_object %>%
-  tail(1) %>%
-  select(point_type) %>%
-  pull()
-
-# Get variation image paths
-# Variation image relies on both the value of the most recent point
-# and the direction that is counted as improvement
-# Improvement direction was calculated earlier to pass to ptd arguments
-# TODO: Add in support for 'neutral' improvement direction
-if(variation_type == "Special Cause - Concern" & improvement_direction == "decrease") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_high.svg"
-if(variation_type == "Special Cause - Concern" & improvement_direction == "increase") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_low.svg"
-if(variation_type == "Special Cause - Improvement" & improvement_direction == "decrease") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_low.svg"
-if(variation_type == "Special Cause - Improvement" & improvement_direction == "increase") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_high.svg"
-if(variation_type == "Common Cause") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/common_cause.svg"
-
-
-# Get assurance image paths
-# NHS R PTD package provides a helper function for calculating this from the PTD object
-if (!is.null(target)) {
-
-assurance_type <- ptd_calculate_assurance_type_2(ptd_object, improvement_direction) %>% select(assurance_type) %>% pull()
-
-if(assurance_type == "inconsistent") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/inconsistent.svg"
-if(assurance_type =="consistent_pass") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/pass.svg"
-if(assurance_type == "consistent_fail") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/fail.svg"
-
-}
-
-if (is.null(target)) assurance_image <- ""
-
-# Get settings from power bi visual formatting options
-if(exists("titlesettings_ChartTitle")) titlesettings_ChartTitle <- titlesettings_ChartTitle else titlesettings_ChartTitle <- ""
-if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
-if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
-
-if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
-
-if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
-
-if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
-
 
 if (outputtypesettings_OutputType == "graph") {
   

@@ -62,6 +62,10 @@
               {
                 "displayName": "Summary Table",
                 "value": "summarytable"
+              },
+              {
+                "displayName": "Summary Matrix",
+                "value": "summarymatrix"
               }
             ]
           }
