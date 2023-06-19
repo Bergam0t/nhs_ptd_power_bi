@@ -100,11 +100,13 @@ palette <- c("Special Cause - Concern" = "#ED8B00",
              "Common Cause" = "#768692")
 
 
+if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
+
 if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
 
 if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "bottom"
 
-if (legendsettings_LegendPosition == "off") showLegend <- FALSE else showLegend <- TRUE
+if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
 
 # Initialise the plotly figure
 fig <- plot_ly(ptd_object,
@@ -204,6 +206,10 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
 if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
 
 
+
+if (outputtypesettings_OutputType == "graph") {
+  
+
 # Update fig to include variation icon and, if present, assurance icon
 # Also pass in user parameters from the PBI visual formatting options for titles
   fig <- fig %>%
@@ -287,9 +293,83 @@ if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSi
                   )
     )
 
+  }
+  
+} else if (outputtypesettings_OutputType == "card") {
+  
+  
+  m <- list(
+    
+    l = 10,
+    
+    r = 10,
+    
+    b = 10,
+    
+    t = 150,
+    
+    pad = 4
+    
+  )
+  
+  fig <- fig %>% 
+    layout(images = list(
+    
+    list(
+      source =  assurance_image,
+      xref="container",
+      yref="container",
+      x=0.8,
+      y=1.45,
+      xanchor="center",
+      yanchor="top",
+      sizex=iconsettings_IconSize*2,
+      sizey=iconsettings_IconSize*2
+    ) ,
+    
+    list(
+      
+      source =  variation_image,
+      xref="container",
+      yref="container",
+      x=0.2,
+      y=1.45,
+      xanchor="center",
+      yanchor="top",
+      sizex=iconsettings_IconSize*2,
+      sizey=iconsettings_IconSize*2
+      
+    )
+    
+    
+    
+    ),
+   margin=m,
+   
+   xaxis = list(title = "", showticklabels=FALSE, showgrid=FALSE),
+   yaxis = list(title = "", showticklabels=FALSE, showgrid=FALSE,
+                zerolinecolor = '#ffff'),
+   
+   
+   title=list(text=titlesettings_ChartTitle,
+              font=list(size=titlesettings_TitleSize*3),
+              automargin=TRUE,
+              yref='container',
+              yanchor = 'top',
+              y=0.95
+   )
+  
+    ) %>% 
+    config(displayModeBar = FALSE)
+    
 }
 
 #fig
+  
+  
+  
+
+  
 
 # ####################################################
 

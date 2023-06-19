@@ -41,6 +41,35 @@
     }
   ],
   "objects": {
+
+    "outputtypesettings": {
+      "displayName": "Output Type",
+      "description": "Output Type",
+      "properties": {
+        "OutputType": {
+          "displayName": "Select Output Type",
+          "description": "Select whether to display a graph, card or summary table (coming soon)",
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Graph",
+                "value": "graph"
+              },
+              {
+                "displayName": "Card",
+                "value": "card"
+              },
+              {
+                "displayName": "Summary Table",
+                "value": "summarytable"
+              }
+            ]
+          }
+        }
+    }
+    },
+
+
     "titlesettings": {
       "displayName": "Title Settings",
       "description": "Title and Title Size",

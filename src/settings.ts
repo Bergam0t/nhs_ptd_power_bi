@@ -40,6 +40,8 @@ export class VisualSettings extends DataViewObjectsParser {
 
       public titlesettings: ChartSettings = new ChartSettings();
 
+      public outputtypesettings: OutputTypeSettings = new OutputTypeSettings();
+
       public xaxissettings: XAxisSettings = new XAxisSettings();
 
       public yaxissettings: YAxisSettings = new YAxisSettings();
@@ -58,7 +60,11 @@ export class VisualSettings extends DataViewObjectsParser {
     //   public provider     // undefined
     //   public source     }
 
-    export class ChartSettings {
+    export class OutputTypeSettings {
+      public OutputType: string = "graph"
+      }
+
+      export class ChartSettings {
         public ChartTitle: string = "";
         public TitleSize: number = 10;
       }
