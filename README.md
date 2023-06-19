@@ -8,6 +8,12 @@ statistical process control (SPC) charts.
 
 ![](man/figures/README-example-powerbi-rebase.png)
 
+**!! At the moment this only works in the PowerBI desktop application -
+while this may be useful for automating the reporting of some KPIs as it
+is possible to export the resulting files to PDF, work is ongoing to
+make this visual work in the PowerBI service so it can be used more
+widely within organisations !!**
+
 All calculations feeding into the visual are powered by R code written
 by package is built by the [NHS-R community](https://nhsrcommunity.com)
 in the NHSRplotthedots package.
@@ -75,6 +81,33 @@ will allow you to add extra titles, subtitles, a heading colour and an
 outline.
 
 ![](man/figures/README-example-powerbi-formatting.png)
+
+## KPI Card
+
+From the ‘Output Options’, select ‘Card’ to get a KPI card like the one
+below.
+
+Various options exist to allow you to tweak the positioning of the MDC
+icons.
+
+![](man/figures/README-example-kpi-card.png)
+
+## KPI Matrix
+
+If passing multiple KPIs, from the ‘Output Options’ select ‘Summary
+Matrix’ to get a table like the one below.
+
+This quickly summarises multiple KPIs, with the KPIs in the top left
+corner generally being of most concern to decision-makers.
+
+![](man/figures/README-example-kpi-matrix.png)
+
+## KPI Summary Table
+
+If passing multiple KPIs, from the ‘Output Options’ select ‘Summary
+Table’ to get a table like the one below.
+
+![](man/figures/README-example-kpi-summary.png)
 
 # Information for Collaborators
 
