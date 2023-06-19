@@ -205,6 +205,9 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
 
 if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
 
+if(exists("cardsettings_CardSuffix")) cardsettings_CardSuffix <- cardsettings_CardSuffix else cardsettings_CardSuffix <- ""
+if(exists("cardsettings_ValueSize")) cardsettings_ValueSize <- cardsettings_ValueSize else cardsettings_ValueSize <- 48
+
 
 
 if (outputtypesettings_OutputType == "graph") {
@@ -344,6 +347,14 @@ if (outputtypesettings_OutputType == "graph") {
     
   )
   
+  t <- list(
+    
+    family = "sans serif",
+    
+    size = 14,
+    
+    color = toRGB("grey50"))
+  
   fig_icons <- plotly_empty() %>% 
     layout(
     images = list(
@@ -352,12 +363,12 @@ if (outputtypesettings_OutputType == "graph") {
         source =  assurance_image,
         xref="paper",
         yref="paper",
-        x=0.8,
-        y=0.5,
+        x=0.9,
+        y=0.4,
         xanchor="center",
         yanchor="top",
-        sizex=iconsettings_IconSize*5,
-        sizey=iconsettings_IconSize*5
+        sizex=iconsettings_IconSize*4,
+        sizey=iconsettings_IconSize*4
       ) ,
       
       list(
@@ -365,39 +376,61 @@ if (outputtypesettings_OutputType == "graph") {
         source =  variation_image,
         xref="paper",
         yref="paper",
-        x=0.2,
-        y=0.5,
+        x=0.1,
+        y=0.4,
         xanchor="center",
         yanchor="top",
-        sizex=iconsettings_IconSize*5,
-        sizey=iconsettings_IconSize*5
+        sizex=iconsettings_IconSize*4,
+        sizey=iconsettings_IconSize*4
         
       )
     ),
-    margin=m2
-    ) %>% 
-    config(displayModeBar = FALSE)
-  
-  # Create figure that is title
-  fig_title <- plotly_empty() %>% 
-    layout(
-      title=list(text=titlesettings_ChartTitle,
-                 font=list(size=titlesettings_TitleSize*3),
-                 #automargin=TRUE,
-                 yref='paper',
-                 yanchor = 'top',
-                 y=0.75
-      ),
+    title=list(text=titlesettings_ChartTitle,
+               font=list(size=titlesettings_TitleSize*3),
+               #automargin=TRUE,
+               yref='paper',
+               yanchor = 'top',
+               y=0.95),
+    
+    margin=m2,
+    
+    annotations = list(
       
-      margin=m2
-
-    ) %>% 
-    config(displayModeBar = FALSE)
+      x = 0.5,
+      
+      y = 0.7,
+      
+      text = dataset %>% 
+        arrange(desc(date)) %>% 
+        head(1) %>% 
+        select(value) %>% 
+        pull() %>% 
+        paste0(cardsettings_CardSuffix),
+      
+      xref = "paper",
+      
+      yref = "paper",
+      
+      showarrow =FALSE,
+      
+      font = list(
+        
+        color = "grey",
+        
+        size = cardsettings_ValueSize
+        
+      )
+      
+      
+    )) %>% 
+    config(displayModeBar = FALSE) 
   
+
   # Join as subplots
   
-  fig <- subplot(fig_title, fig_icons, fig_plot, 
-                 nrows = 3, heights = c(0.2, 0.6, 0.2))
+  fig <- subplot(fig_icons, fig_plot, 
+                 nrows = 2, 
+                 heights = c(0.6, 0.4))
      
 }
 

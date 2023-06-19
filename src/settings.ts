@@ -52,6 +52,8 @@ export class VisualSettings extends DataViewObjectsParser {
 
       public iconsettings: IconSettings = new IconSettings();
 
+      public cardsettings: CardSettings = new CardSettings();
+
     }
 
 
@@ -92,3 +94,8 @@ export class VisualSettings extends DataViewObjectsParser {
       public IconSize: number = 0.1;
 
     }
+
+    export class CardSettings {
+      public CardSuffix: string = "";
+      public ValueSize: number = 48;
+      }
