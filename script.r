@@ -31,7 +31,7 @@ libraryRequireInstall("DT")
 
 # If testing, a sample dataset can be loaded from here (changing the path below the 
 # repository if necessary)
-# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_decrease_good_trending_lower_no_target.csv") %>%
+# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_double_rebase_increase_good_trending_higher_inconsistent.csv") %>%
 #           mutate(date = lubridate::dmy(date))
 
 dataset <- Values %>% 
@@ -44,7 +44,7 @@ dataset <- Values %>%
 if(is.na(unique(dataset$baseline_duration))) baseline <- NULL else baseline <- unique(dataset$baseline_duration)
 
 # Extract rebase points (if included) - if none passed, return NULL so that we get default ptd behaviour 
-if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) > 1) rebase_points <- NULL else rebase_points <- dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% pull() %>% ptd_rebase()
+if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) rebase_points <- NULL else rebase_points <- (dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase()
 
 # Get any target values (if included)
 # If present, pass through to ptd target function
