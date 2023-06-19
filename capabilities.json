@@ -87,7 +87,25 @@
           "type": {
             "numeric": true
           }
+        },
+
+        "TitleJustification": {
+          "displayName": "Title Justification",
+          "description": "Set Title Justification",
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Central",
+                "value": "central"
+              },
+              {
+                "displayName": "Left",
+                "value": "left"
+              }
+            ]
+          }
         }
+
       }
     },
 
@@ -178,17 +196,18 @@
   "displayName": "Card Settings",
   "description": "Card theme and settings",
   "properties": {
-    "CardSuffix": {
-      "displayName": "Card Suffix",
-      "description": "Value to appear after card value",
+
+    "CardPrefix": {
+      "displayName": "Card Prefix",
+      "description": "Value to appear before card value",
       "type": {
         "text": true
       }
     },
 
-    "CardPrefix": {
-      "displayName": "Card Prefix",
-      "description": "Value to appear before card value",
+    "CardSuffix": {
+      "displayName": "Card Suffix",
+      "description": "Value to appear after card value",
       "type": {
         "text": true
       }
@@ -200,10 +219,44 @@
       "type": {
         "numeric": true
       }
+    },
+
+    "IconPosition": {
+      "displayName": "Icon Position",
+      "description": "Set Value Size",
+      "type": {
+        "enumeration": [
+          {
+            "displayName": "Central",
+            "value": "central"
+          },
+          {
+            "displayName": "Right",
+            "value": "right"
+          }
+        ]
+      }
+    },
+
+    "CardTitleJustification": {
+      "displayName": "Card Title Justification",
+      "description": "Set Card Title Justification",
+      "type": {
+        "enumeration": [
+          {
+            "displayName": "Central",
+            "value": "central"
+          },
+          {
+            "displayName": "Left",
+            "value": "left"
+          }
+        ]
+      }
     }
+
 }
 },
-
 
 
     "rcv_script": {

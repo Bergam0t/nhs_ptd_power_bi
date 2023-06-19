@@ -197,6 +197,7 @@ if (is.null(target)) assurance_image <- ""
 
 # Get settings from power bi visual formatting options
 if(exists("titlesettings_ChartTitle")) titlesettings_ChartTitle <- titlesettings_ChartTitle else titlesettings_ChartTitle <- ""
+if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
 if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
 
 if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
@@ -204,12 +205,6 @@ if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings
 if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
 
 if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
-
-if(exists("cardsettings_CardSuffix")) cardsettings_CardSuffix <- cardsettings_CardSuffix else cardsettings_CardSuffix <- ""
-if(exists("cardsettings_CardPrefix")) cardsettings_CardPrefix <- cardsettings_CardPrefix else cardsettings_CardPrefix <- ""
-
-if(exists("cardsettings_ValueSize")) cardsettings_ValueSize <- cardsettings_ValueSize else cardsettings_ValueSize <- 48
-
 
 
 if (outputtypesettings_OutputType == "graph") {
@@ -228,7 +223,9 @@ if (outputtypesettings_OutputType == "graph") {
                  font=list(size=titlesettings_TitleSize),
                  automargin=TRUE,
                  yref='container',
-                 yanchor =  'top'
+                 yanchor ='top',
+                 xred = if(titlesettings_TitleJustification == "central") "center" else "left"
+                 
                  ),
 
       # Add in icons for variation and, if target present, assurance
@@ -261,7 +258,7 @@ if (outputtypesettings_OutputType == "graph") {
           source =  assurance_image,
           xref="paper",
           yref="paper",
-          x=0.22,
+          x=0.22  ,
           y=1.05,
          xanchor="right",
          yanchor="top",
@@ -302,6 +299,14 @@ if (outputtypesettings_OutputType == "graph") {
   
 } else if (outputtypesettings_OutputType == "card") {
   
+  
+  if(exists("cardsettings_CardSuffix")) cardsettings_CardSuffix <- cardsettings_CardSuffix else cardsettings_CardSuffix <- ""
+  if(exists("cardsettings_CardPrefix")) cardsettings_CardPrefix <- cardsettings_CardPrefix else cardsettings_CardPrefix <- ""
+  
+  if(exists("cardsettings_ValueSize")) cardsettings_ValueSize <- cardsettings_ValueSize else cardsettings_ValueSize <- 48
+  
+  if(exists("cardsettings_IconPosition")) cardsettings_IconPosition <- cardsettings_IconPosition else cardsettings_IconPosition <- "central"
+  if(exists("cardsettings_CardTitleJustification")) cardsettings_CardTitleJustification <- cardsettings_CardTitleJustification else cardsettings_CardTitleJustification <- "central"
   
   m <- list(
     
@@ -365,8 +370,8 @@ if (outputtypesettings_OutputType == "graph") {
         source =  assurance_image,
         xref="paper",
         yref="paper",
-        x=0.9,
-        y=0.4,
+        x=if(cardsettings_IconPosition == "central") 0.9 else 0.9,
+        y=if(cardsettings_IconPosition == "central") 0.4 else 0.95,
         xanchor="center",
         yanchor="top",
         sizex=iconsettings_IconSize*4,
@@ -378,8 +383,8 @@ if (outputtypesettings_OutputType == "graph") {
         source =  variation_image,
         xref="paper",
         yref="paper",
-        x=0.1,
-        y=0.4,
+        x=if(cardsettings_IconPosition == "central") 0.1 else 0.9,
+        y=if(cardsettings_IconPosition == "central") 0.4 else 0.45,
         xanchor="center",
         yanchor="top",
         sizex=iconsettings_IconSize*4,
@@ -392,13 +397,16 @@ if (outputtypesettings_OutputType == "graph") {
                #automargin=TRUE,
                yref='paper',
                yanchor = 'top',
-               y=0.95),
+               y=0.95,
+               xref=if(cardsettings_CardTitleJustification == "central") "center" else "left",
+               x=if(cardsettings_CardTitleJustification == "central") 0.5 else 0.05
+               ),
     
     margin=m2,
     
     annotations = list(
       
-      x = 0.5,
+      x =  if(cardsettings_IconPosition == "central") 0.5 else 0.05,
       
       y = 0.7,
       
@@ -416,6 +424,8 @@ if (outputtypesettings_OutputType == "graph") {
       xref = "paper",
       
       yref = "paper",
+      
+      xanchor =  if(cardsettings_IconPosition == "central") 'center' else 'left',
       
       showarrow =FALSE,
       

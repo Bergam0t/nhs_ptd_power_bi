@@ -69,6 +69,7 @@ export class VisualSettings extends DataViewObjectsParser {
       export class ChartSettings {
         public ChartTitle: string = "";
         public TitleSize: number = 10;
+        public TitleJustification: string = "central";
       }
 
     export class XAxisSettings {
@@ -85,7 +86,7 @@ export class VisualSettings extends DataViewObjectsParser {
 
     export class LegendSettings {
 
-      public LegendPosition: string = "below"
+      public LegendPosition: string = "below";
 
     }
 
@@ -99,4 +100,6 @@ export class VisualSettings extends DataViewObjectsParser {
       public CardSuffix: string = "";
       public CardPrefix: string = "";
       public ValueSize: number = 48;
+      public IconPosition: string = "central";
+      public CardTitleJustification: string = "central";
       }
