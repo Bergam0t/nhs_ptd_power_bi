@@ -206,6 +206,8 @@ if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings
 if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
 
 if(exists("cardsettings_CardSuffix")) cardsettings_CardSuffix <- cardsettings_CardSuffix else cardsettings_CardSuffix <- ""
+if(exists("cardsettings_CardPrefix")) cardsettings_CardPrefix <- cardsettings_CardPrefix else cardsettings_CardPrefix <- ""
+
 if(exists("cardsettings_ValueSize")) cardsettings_ValueSize <- cardsettings_ValueSize else cardsettings_ValueSize <- 48
 
 
@@ -405,7 +407,11 @@ if (outputtypesettings_OutputType == "graph") {
         head(1) %>% 
         select(value) %>% 
         pull() %>% 
-        paste0(cardsettings_CardSuffix),
+        paste0(
+          cardsettings_CardPrefix,
+          .,
+          cardsettings_CardSuffix
+          ),
       
       xref = "paper",
       

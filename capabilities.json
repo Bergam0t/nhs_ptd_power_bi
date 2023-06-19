@@ -186,6 +186,14 @@
       }
     },
 
+    "CardPrefix": {
+      "displayName": "Card Prefix",
+      "description": "Value to appear before card value",
+      "type": {
+        "text": true
+      }
+    },
+
     "ValueSize": {
       "displayName": "Value Size",
       "description": "Set Value Size",

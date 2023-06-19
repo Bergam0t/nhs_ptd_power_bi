@@ -97,5 +97,6 @@ export class VisualSettings extends DataViewObjectsParser {
 
     export class CardSettings {
       public CardSuffix: string = "";
+      public CardPrefix: string = "";
       public ValueSize: number = 48;
       }
