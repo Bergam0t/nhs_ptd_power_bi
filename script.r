@@ -41,17 +41,24 @@ libraryRequireInstall("DT")
 # Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_10_areas.csv") %>%
 #           mutate(date = lubridate::dmy(date))
 
-
+# Import the mandatory columns
 if(exists("value")) value <- value else value <- NULL
 if(exists("date")) date <- date else date <- NULL
 if(exists("what")) what <- what else what <- NULL
 if(exists("improvement_direction")) improvement_direction <- improvement_direction else improvement_direction <- NULL
-if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
-if(exists("comment")) comment <- comment else comment <- NULL
-if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
-if(exists("target")) target <- target else target <- NULL
 
-Values <- cbind(value, date, what, improvement_direction, target, recalc_here, comment, baseline_duration)
+# Import the optional columns
+if(exists("target")) target <- target else target <- NULL
+if(exists("comment")) comment <- comment else comment <- NULL
+if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
+if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
+
+Values <- cbind(value, date, what, improvement_direction)
+
+if(!is.null(target)) Values <- bind_cols(Values, target) else Values <- Values %>% mutate(target = NA)
+if(!is.null(comment)) Values <- bind_cols(Values, comment) else Values <- Values %>% mutate(comment = NA)
+if(!is.null(recalc_here)) Values <- bind_cols(Values, recalc_here) else Values <- Values %>% mutate(recalc_here = NA)
+if(!is.null(baseline_duration)) Values <- bind_cols(Values, baseline_duration) else Values <- Values %>% mutate(baseline_duration = NA)
 
 
 dataset <- Values %>% 
