@@ -190,8 +190,8 @@
       "description": "SPC Settings",
       "properties": {
         "ImprovementDirection": {
-          "displayName": "Manually Set Improvement Direction (will only work if improvement direction column not provided)",
-          "description": "If improvement direction is not provided in the dataset, you can set it here",
+          "displayName": "Manually Set Improvement Direction (if improvement direction column not provided)",
+          "description": "If improvement direction is not provided in the dataset, you can set it here.",
           "type": {
             "enumeration": [
               {
@@ -207,6 +207,14 @@
                 "value": "neutral"
               }
             ]
+          }
+        },
+
+        "Target": {
+          "displayName": "Manually Set Target (if target column not provided)",
+          "description": "If a target is not provided in the dataset, you can set it here. This will only work for a single graph or card, not a summary matrix or table.",
+          "type": {
+            "numeric": true
           }
         }
     }

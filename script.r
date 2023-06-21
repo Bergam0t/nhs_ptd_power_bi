@@ -92,6 +92,10 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
   # Get any target values (if included)
   # If present, pass through to ptd target function
   if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
+
+  #if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+
+  #if (is.na(target)) target <- spcsettings_Target
   
   # Take improvement direction from where it is specified in original dataframe
   # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
@@ -250,6 +254,11 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   # If present, pass through to ptd target function
   if(is.na(unique(dataset$target))) target <- NULL else target <- unique(dataset$target) %>% ptd_target()
   
+  if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+
+  if (is.null(target) & !is.null(spcsettings_Target)) target <- spcsettings_Target
+  
+
   # Take improvement direction from where it is specified in original dataframe
   # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
   # My current thinking is that while dataframe is inefficient for storage, it's far more efficient for creating 
