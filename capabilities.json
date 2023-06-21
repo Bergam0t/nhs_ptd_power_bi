@@ -1,13 +1,98 @@
 {
   "dataRoles": [
     {
-      "displayName": "Values",
+      "displayName": "Values (y axis)",
+      "description": "Numeric values - the thing you are measuring.",
       "kind": "GroupingOrMeasure",
-      "name": "Values"
+      "name": "value"
+    },
+
+    {
+      "displayName": "Dates (x axis)",
+      "description": "Dates (text column in format yyyy-mm-dd or dd-mm-yyyy, or PowerBI date column).",
+      "kind": "GroupingOrMeasure",
+      "name": "date"
+    },
+
+    {
+      "displayName": "Identifier - e.g. KPI Name (OPTIONAL)",
+      "description": "Optional for single graph or card. If a single value for the whole dataset, will be used as the graph/card title by default. Mandatory for summary tables and summary matrix.",
+      "kind": "GroupingOrMeasure",
+      "name": "what"
+    },
+
+    {
+      "displayName": "Improvement Direction (increase or decrease)",
+      "description": "Optional for single graph or card. Mandatory for summary tables and summary matrix.",
+      "kind": "GroupingOrMeasure",
+      "name": "improvement_direction"
+    },
+
+    {
+      "displayName": "Target (OPTIONAL)",
+      "description": "Optional for single graph or card - can be manually set in options. Optional for summary tables and summary matrix but cannot be manually set in options for these visual types.",
+      "kind": "GroupingOrMeasure",
+      "name": "target"
+    },
+
+
+    {
+      "displayName": "Recalculation Points (OPTIONAL)",
+      "description": "Optional for all visual types. A column containing y, Y, Yes or YES at every point that the process limits should be recalculated.",
+      "kind": "GroupingOrMeasure",
+      "name": "recalc_here"
+    },
+
+    {
+      "displayName": "Annotations (OPTIONAL)",
+      "description": "Optional for all visual types. Will only be included in standard graph.",
+      "kind": "GroupingOrMeasure",
+      "name": "annotations"
+    },
+
+    {
+      "displayName": "Baseline Duration (OPTIONAL)",
+      "description": "Optional for all visual types. Can be used to override default baseline duration.",
+      "kind": "GroupingOrMeasure",
+      "name": "baseline_duration"
     }
+
+
   ],
   "dataViewMappings": [
     {
+      "conditions": [
+        {
+          "value": {
+            "max": 1
+          },
+          "date": {
+            "max": 1
+          },
+          "what": {
+            "max": 1
+          },
+          "improvement_direction": {
+            "max": 1
+          },
+          "recalc_here": {
+            "max": 1
+          },
+          "annotations": {
+            "max": 1
+          },
+          "baseline_duration": {
+            "max": 1
+          },
+          "target": {
+            "max": 1
+          }
+        }
+
+
+
+
+      ],
       "scriptResult": {
         "dataInput": {
           "table": {
@@ -15,7 +100,42 @@
               "select": [
                 {
                   "for": {
-                    "in": "Values"
+                    "in": "value"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "date"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "what"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "improvement_direction"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "recalc_here"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "annotations"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "baseline_duration"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "target"
                   }
                 }
               ],
@@ -73,11 +193,55 @@
     }
     },
 
+    "spcsettings": {
+      "displayName": "SPC Settings",
+      "description": "SPC Settings",
+      "properties": {
+        "ImprovementDirection": {
+          "displayName": "Manually Set Improvement Direction (if improvement direction column not provided)",
+          "description": "If improvement direction is not provided in the dataset, you can set it here.",
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Increase",
+                "value": "increase"
+              },
+              {
+                "displayName": "Decrease",
+                "value": "decrease"
+              },
+              {
+                "displayName": "Neutral (coming soon)",
+                "value": "neutral"
+              }
+            ]
+          }
+        },
+
+        "Target": {
+          "displayName": "Manually Set Target (if target column not provided)",
+          "description": "If a target is not provided in the dataset, you can set it here. This will only work for a single graph or card, not a summary matrix or table.",
+          "type": {
+            "numeric": true
+          }
+        }
+    }
+    },
+
 
     "titlesettings": {
+      
       "displayName": "Title Settings",
       "description": "Title and Title Size",
       "properties": {
+        "TitleOn": {
+          "displayName": "Display Title?",
+          "description": "Turn title on or off",
+          "type": {
+            "bool": true
+          }
+        },
+
         "ChartTitle": {
           "displayName": "Chart Title",
           "description": "Set chart title",

@@ -41,12 +41,30 @@ libraryRequireInstall("DT")
 # Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_10_areas.csv") %>%
 #           mutate(date = lubridate::dmy(date))
 
+# Import the mandatory columns
+if(exists("value")) value <- value else value <- NULL
+if(exists("date")) date <- date else date <- NULL
 
+# Import the optional columns
+if(exists("what")) what <- what else what <- NULL
+if(exists("improvement_direction")) improvement_direction <- improvement_direction else improvement_direction <- NULL
+if(exists("target")) target <- target else target <- NULL
+if(exists("annotations")) annotations <- annotations else annotations <- NULL
+if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
+if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
+
+Values <- cbind(value, date)
+
+if(!is.null(what)) Values <- bind_cols(Values, what) else Values <- Values %>% mutate(what = NA)
+if(!is.null(improvement_direction)) Values <- bind_cols(Values, improvement_direction) else Values <- Values %>% mutate(improvement_direction = NA)
+if(!is.null(target)) Values <- bind_cols(Values, target) else Values <- Values %>% mutate(target = NA)
+if(!is.null(annotations)) Values <- bind_cols(Values, annotations) else Values <- Values %>% mutate(annotations = NA)
+if(!is.null(recalc_here)) Values <- bind_cols(Values, recalc_here) else Values <- Values %>% mutate(recalc_here = NA)
+if(!is.null(baseline_duration)) Values <- bind_cols(Values, baseline_duration) else Values <- Values %>% mutate(baseline_duration = NA)
 
 
 dataset <- Values %>% 
     mutate(date = as.Date(date))
-
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
@@ -62,8 +80,7 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
   single_what <- dataset %>% 
     filter(what == what_item) 
     
-    
-  # Extract option for baseline length
+  # Extract option for baseline length (if included)
   # Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
   # We need the true null as then this means we will get the default behaviour of the ptd function
   # if nothing is passed by the user
@@ -75,6 +92,10 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
   # Get any target values (if included)
   # If present, pass through to ptd target function
   if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
+
+  #if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+
+  #if (is.na(target)) target <- spcsettings_Target
   
   # Take improvement direction from where it is specified in original dataframe
   # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
@@ -88,6 +109,12 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
     # Force as character to appease the PBI service
     as.character()
   
+  # If no improvement direction passed in the dataset, take the value from the dropdown instead
+  # Note default in dropdown is "increase", in line with SPC defaults
+  if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
+
+  if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
+
   
   # Generate NHS R making data count object
   ptd_df <- ptd_spc(single_what, 
@@ -227,6 +254,11 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   # If present, pass through to ptd target function
   if(is.na(unique(dataset$target))) target <- NULL else target <- unique(dataset$target) %>% ptd_target()
   
+  if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+
+  if (is.null(target) & !is.null(spcsettings_Target)) target <- spcsettings_Target
+  
+
   # Take improvement direction from where it is specified in original dataframe
   # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
   # My current thinking is that while dataframe is inefficient for storage, it's far more efficient for creating 
@@ -238,6 +270,12 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
     pull() %>% 
     # Force as character to appease the PBI service
     as.character()
+
+  # If no improvement direction passed in the dataset, take the value from the dropdown instead
+  # Note default in dropdown is "increase", in line with SPC defaults
+  if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
+
+  if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
   
   
   # Generate NHS R making data count object
@@ -373,7 +411,6 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   if (is.null(target)) assurance_image <- ""
   
   # Get settings from power bi visual formatting options
-  if(exists("titlesettings_ChartTitle")) titlesettings_ChartTitle <- titlesettings_ChartTitle else titlesettings_ChartTitle <- ""
   if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
   if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
   
@@ -382,6 +419,29 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
   
   if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
+
+
+  if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
+
+  if (titlesettings_TitleOn == TRUE) {
+
+    what_column <- dataset %>% distinct(what) %>% pull()
+    if(!is.na(what_column) & length(what_column) == 1) default_title <- what_column else default_title <- NA
+    if(exists("titlesettings_ChartTitle")) titlesettings_ChartTitle <- titlesettings_ChartTitle else titlesettings_ChartTitle <- ""
+    if(!is.na(default_title) & (titlesettings_ChartTitle=="") | is.na(titlesettings_ChartTitle)) title <- default_title else title <- titlesettings_ChartTitle
+
+    # If using default title in a card visual, wrap it
+    if (outputtypesettings_OutputType == "card" & (!is.na(default_title) & (titlesettings_ChartTitle=="") | is.na(titlesettings_ChartTitle))) {
+        title <- stringr::str_wrap(title, 20)
+    }
+
+  } else {
+
+    title <- ""
+
+  }
+
+
 }
 
 if (outputtypesettings_OutputType == "graph") {
@@ -396,7 +456,7 @@ if (outputtypesettings_OutputType == "graph") {
     yaxis = list(title = yaxissettings_YAxisTitle),
 
 
-      title=list(text=titlesettings_ChartTitle,
+      title=list(text=title,
                  font=list(size=titlesettings_TitleSize),
                  automargin=TRUE,
                  yref='container',
@@ -531,13 +591,37 @@ if (outputtypesettings_OutputType == "graph") {
     
   )
   
+
+
+  
   t <- list(
     
     family = "sans serif",
     
     size = 14,
     
-    color = toRGB("grey50"))
+    color = toRGB("grey50")
+    )
+
+
+  if (titlesettings_TitleOn == TRUE) {
+  
+  card_title <- list(text=title,
+               font=list(size=titlesettings_TitleSize*3),
+               #automargin=TRUE,
+               yref='paper',
+               yanchor = 'top',
+               y=0.95,
+               xref=if(cardsettings_CardTitleJustification == "central") "center" else "left",
+               x=if(cardsettings_CardTitleJustification == "central") 0.5 else 0.05
+               )
+
+  } else {
+
+  card_title <- NULL
+
+  }
+  
   
   fig_icons <- plotly_empty() %>% 
     layout(
@@ -569,15 +653,7 @@ if (outputtypesettings_OutputType == "graph") {
         
       )
     ),
-    title=list(text=titlesettings_ChartTitle,
-               font=list(size=titlesettings_TitleSize*3),
-               #automargin=TRUE,
-               yref='paper',
-               yanchor = 'top',
-               y=0.95,
-               xref=if(cardsettings_CardTitleJustification == "central") "center" else "left",
-               x=if(cardsettings_CardTitleJustification == "central") 0.5 else 0.05
-               ),
+    title=card_title,
     
     margin=m2,
     
