@@ -44,17 +44,18 @@ libraryRequireInstall("DT")
 # Import the mandatory columns
 if(exists("value")) value <- value else value <- NULL
 if(exists("date")) date <- date else date <- NULL
-if(exists("what")) what <- what else what <- NULL
 
 # Import the optional columns
+if(exists("what")) what <- what else what <- NULL
 if(exists("improvement_direction")) improvement_direction <- improvement_direction else improvement_direction <- NULL
 if(exists("target")) target <- target else target <- NULL
 if(exists("annotations")) annotations <- annotations else annotations <- NULL
 if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
 if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
 
-Values <- cbind(value, date, what)
+Values <- cbind(value, date)
 
+if(!is.null(what)) Values <- bind_cols(Values, what) else Values <- Values %>% mutate(what = NA)
 if(!is.null(improvement_direction)) Values <- bind_cols(Values, improvement_direction) else Values <- Values %>% mutate(improvement_direction = NA)
 if(!is.null(target)) Values <- bind_cols(Values, target) else Values <- Values %>% mutate(target = NA)
 if(!is.null(annotations)) Values <- bind_cols(Values, annotations) else Values <- Values %>% mutate(annotations = NA)
