@@ -185,6 +185,33 @@
     }
     },
 
+    "spcsettings": {
+      "displayName": "SPC Settings",
+      "description": "SPC Settings",
+      "properties": {
+        "ImprovementDirection": {
+          "displayName": "Manually Set Improvement Direction (will only work if improvement direction column not provided)",
+          "description": "If improvement direction is not provided in the dataset, you can set it here",
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Increase",
+                "value": "increase"
+              },
+              {
+                "displayName": "Decrease",
+                "value": "decrease"
+              },
+              {
+                "displayName": "Neutral (coming soon)",
+                "value": "neutral"
+              }
+            ]
+          }
+        }
+    }
+    },
+
 
     "titlesettings": {
       "displayName": "Title Settings",

@@ -45,24 +45,25 @@ libraryRequireInstall("DT")
 if(exists("value")) value <- value else value <- NULL
 if(exists("date")) date <- date else date <- NULL
 if(exists("what")) what <- what else what <- NULL
-if(exists("improvement_direction")) improvement_direction <- improvement_direction else improvement_direction <- NULL
 
 # Import the optional columns
+if(exists("improvement_direction")) improvement_direction <- improvement_direction else improvement_direction <- NULL
 if(exists("target")) target <- target else target <- NULL
 if(exists("annotations")) annotations <- annotations else annotations <- NULL
 if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
 if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
 
-Values <- cbind(value, date, what, improvement_direction)
+Values <- cbind(value, date, what)
 
+if(!is.null(improvement_direction)) Values <- bind_cols(Values, improvement_direction) else Values <- Values %>% mutate(improvement_direction = NA)
 if(!is.null(target)) Values <- bind_cols(Values, target) else Values <- Values %>% mutate(target = NA)
 if(!is.null(annotations)) Values <- bind_cols(Values, annotations) else Values <- Values %>% mutate(annotations = NA)
 if(!is.null(recalc_here)) Values <- bind_cols(Values, recalc_here) else Values <- Values %>% mutate(recalc_here = NA)
 if(!is.null(baseline_duration)) Values <- bind_cols(Values, baseline_duration) else Values <- Values %>% mutate(baseline_duration = NA)
 
+
 dataset <- Values %>% 
     mutate(date = as.Date(date))
-
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
@@ -78,7 +79,7 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
   single_what <- dataset %>% 
     filter(what == what_item) 
     
-  # Extract option for baseline length
+  # Extract option for baseline length (if included)
   # Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
   # We need the true null as then this means we will get the default behaviour of the ptd function
   # if nothing is passed by the user
@@ -103,6 +104,12 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
     # Force as character to appease the PBI service
     as.character()
   
+  # If no improvement direction passed in the dataset, take the value from the dropdown instead
+  # Note default in dropdown is "increase", in line with SPC defaults
+  if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
+
+  if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
+
   
   # Generate NHS R making data count object
   ptd_df <- ptd_spc(single_what, 
@@ -253,6 +260,12 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
     pull() %>% 
     # Force as character to appease the PBI service
     as.character()
+
+  # If no improvement direction passed in the dataset, take the value from the dropdown instead
+  # Note default in dropdown is "increase", in line with SPC defaults
+  if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
+
+  if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
   
   
   # Generate NHS R making data count object

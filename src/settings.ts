@@ -38,6 +38,8 @@ export class VisualSettings extends DataViewObjectsParser {
       
       //public ggsettings: ChartTitle = new ChartTitle();
 
+      public spcsettings: SPCSettings = new SPCSettings();
+      
       public titlesettings: ChartSettings = new ChartSettings();
 
       public outputtypesettings: OutputTypeSettings = new OutputTypeSettings();
@@ -66,11 +68,15 @@ export class VisualSettings extends DataViewObjectsParser {
       public OutputType: string = "graph"
       }
 
-      export class ChartSettings {
-        public ChartTitle: string = "";
-        public TitleSize: number = 10;
-        public TitleJustification: string = "central";
+    export class SPCSettings {
+      public ImprovementDirection: string = "increase"
       }
+
+    export class ChartSettings {
+      public ChartTitle: string = "";
+      public TitleSize: number = 10;
+      public TitleJustification: string = "central";
+    }
 
     export class XAxisSettings {
       public XAxisTitle: string = "";
