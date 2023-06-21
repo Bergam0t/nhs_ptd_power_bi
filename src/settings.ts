@@ -74,6 +74,7 @@ export class VisualSettings extends DataViewObjectsParser {
       }
 
     export class ChartSettings {
+      public TitleOn: boolean = true;
       public ChartTitle: string = "";
       public TitleSize: number = 10;
       public TitleJustification: string = "central";

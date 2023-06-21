@@ -411,7 +411,6 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   if (is.null(target)) assurance_image <- ""
   
   # Get settings from power bi visual formatting options
-  if(exists("titlesettings_ChartTitle")) titlesettings_ChartTitle <- titlesettings_ChartTitle else titlesettings_ChartTitle <- ""
   if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
   if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
   
@@ -420,6 +419,29 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
   
   if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
+
+
+  if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
+
+  if (titlesettings_TitleOn == TRUE) {
+
+    what_column <- dataset %>% distinct(what) %>% pull()
+    if(!is.na(what_column) & length(what_column) == 1) default_title <- what_column else default_title <- NA
+    if(exists("titlesettings_ChartTitle")) titlesettings_ChartTitle <- titlesettings_ChartTitle else titlesettings_ChartTitle <- ""
+    if(!is.na(default_title) & (titlesettings_ChartTitle=="") | is.na(titlesettings_ChartTitle)) title <- default_title else title <- titlesettings_ChartTitle
+
+    # If using default title in a card visual, wrap it
+    if (outputtypesettings_OutputType == "card" & (!is.na(default_title) & (titlesettings_ChartTitle=="") | is.na(titlesettings_ChartTitle))) {
+        title <- stringr::str_wrap(title, 20)
+    }
+
+  } else {
+
+    title <- ""
+
+  }
+
+
 }
 
 if (outputtypesettings_OutputType == "graph") {
@@ -434,7 +456,7 @@ if (outputtypesettings_OutputType == "graph") {
     yaxis = list(title = yaxissettings_YAxisTitle),
 
 
-      title=list(text=titlesettings_ChartTitle,
+      title=list(text=title,
                  font=list(size=titlesettings_TitleSize),
                  automargin=TRUE,
                  yref='container',
@@ -569,13 +591,37 @@ if (outputtypesettings_OutputType == "graph") {
     
   )
   
+
+
+  
   t <- list(
     
     family = "sans serif",
     
     size = 14,
     
-    color = toRGB("grey50"))
+    color = toRGB("grey50")
+    )
+
+
+  if (titlesettings_TitleOn == TRUE) {
+  
+  card_title <- list(text=title,
+               font=list(size=titlesettings_TitleSize*3),
+               #automargin=TRUE,
+               yref='paper',
+               yanchor = 'top',
+               y=0.95,
+               xref=if(cardsettings_CardTitleJustification == "central") "center" else "left",
+               x=if(cardsettings_CardTitleJustification == "central") 0.5 else 0.05
+               )
+
+  } else {
+
+  card_title <- NULL
+
+  }
+  
   
   fig_icons <- plotly_empty() %>% 
     layout(
@@ -607,15 +653,7 @@ if (outputtypesettings_OutputType == "graph") {
         
       )
     ),
-    title=list(text=titlesettings_ChartTitle,
-               font=list(size=titlesettings_TitleSize*3),
-               #automargin=TRUE,
-               yref='paper',
-               yanchor = 'top',
-               y=0.95,
-               xref=if(cardsettings_CardTitleJustification == "central") "center" else "left",
-               x=if(cardsettings_CardTitleJustification == "central") 0.5 else 0.05
-               ),
+    title=card_title,
     
     margin=m2,
     

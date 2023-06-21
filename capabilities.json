@@ -230,9 +230,18 @@
 
 
     "titlesettings": {
+      
       "displayName": "Title Settings",
       "description": "Title and Title Size",
       "properties": {
+        "TitleOn": {
+          "displayName": "Display Title?",
+          "description": "Turn title on or off",
+          "type": {
+            "bool": true
+          }
+        },
+
         "ChartTitle": {
           "displayName": "Chart Title",
           "description": "Set chart title",
