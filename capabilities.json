@@ -2,30 +2,35 @@
   "dataRoles": [
     {
       "displayName": "Values (y axis)",
+      "description": "Numeric values - the thing you are measuring.",
       "kind": "GroupingOrMeasure",
       "name": "value"
     },
 
     {
       "displayName": "Dates (x axis)",
+      "description": "Dates (text column in format yyyy-mm-dd or dd-mm-yyyy, or PowerBI date column).",
       "kind": "GroupingOrMeasure",
       "name": "date"
     },
 
     {
-      "displayName": "Identifier (e.g. KPI Name)",
+      "displayName": "Identifier - e.g. KPI Name (OPTIONAL)",
+      "description": "Optional for single graph or card. If a single value for the whole dataset, will be used as the graph/card title by default. Mandatory for summary tables and summary matrix.",
       "kind": "GroupingOrMeasure",
       "name": "what"
     },
 
     {
       "displayName": "Improvement Direction (increase or decrease)",
+      "description": "Optional for single graph or card. Mandatory for summary tables and summary matrix.",
       "kind": "GroupingOrMeasure",
       "name": "improvement_direction"
     },
 
     {
       "displayName": "Target (OPTIONAL)",
+      "description": "Optional for single graph or card - can be manually set in options. Optional for summary tables and summary matrix but cannot be manually set in options for these visual types.",
       "kind": "GroupingOrMeasure",
       "name": "target"
     },
@@ -33,18 +38,21 @@
 
     {
       "displayName": "Recalculation Points (OPTIONAL)",
+      "description": "Optional for all visual types. A column containing y, Y, Yes or YES at every point that the process limits should be recalculated.",
       "kind": "GroupingOrMeasure",
       "name": "recalc_here"
     },
 
     {
       "displayName": "Annotations (OPTIONAL)",
+      "description": "Optional for all visual types. Will only be included in standard graph.",
       "kind": "GroupingOrMeasure",
       "name": "annotations"
     },
 
     {
       "displayName": "Baseline Duration (OPTIONAL)",
+      "description": "Optional for all visual types. Can be used to override default baseline duration.",
       "kind": "GroupingOrMeasure",
       "name": "baseline_duration"
     }
