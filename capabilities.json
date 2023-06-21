@@ -40,7 +40,7 @@
     {
       "displayName": "Annotations (OPTIONAL)",
       "kind": "GroupingOrMeasure",
-      "name": "comment"
+      "name": "annotations"
     },
 
     {
@@ -70,7 +70,7 @@
           "recalc_here": {
             "max": 1
           },
-          "comment": {
+          "annotations": {
             "max": 1
           },
           "baseline_duration": {
@@ -117,7 +117,7 @@
                 },
                 {
                   "for": {
-                    "in": "comment"
+                    "in": "annotations"
                   }
                 },
                 {

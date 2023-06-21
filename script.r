@@ -49,17 +49,16 @@ if(exists("improvement_direction")) improvement_direction <- improvement_directi
 
 # Import the optional columns
 if(exists("target")) target <- target else target <- NULL
-if(exists("comment")) comment <- comment else comment <- NULL
+if(exists("annotations")) annotations <- annotations else annotations <- NULL
 if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
 if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
 
 Values <- cbind(value, date, what, improvement_direction)
 
 if(!is.null(target)) Values <- bind_cols(Values, target) else Values <- Values %>% mutate(target = NA)
-if(!is.null(comment)) Values <- bind_cols(Values, comment) else Values <- Values %>% mutate(comment = NA)
+if(!is.null(annotations)) Values <- bind_cols(Values, annotations) else Values <- Values %>% mutate(annotations = NA)
 if(!is.null(recalc_here)) Values <- bind_cols(Values, recalc_here) else Values <- Values %>% mutate(recalc_here = NA)
 if(!is.null(baseline_duration)) Values <- bind_cols(Values, baseline_duration) else Values <- Values %>% mutate(baseline_duration = NA)
-
 
 dataset <- Values %>% 
     mutate(date = as.Date(date))
@@ -78,7 +77,6 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
     
   single_what <- dataset %>% 
     filter(what == what_item) 
-    
     
   # Extract option for baseline length
   # Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
