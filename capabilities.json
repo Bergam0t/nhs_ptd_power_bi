@@ -1,13 +1,90 @@
 {
   "dataRoles": [
     {
-      "displayName": "Values",
+      "displayName": "Values (y axis)",
       "kind": "GroupingOrMeasure",
-      "name": "Values"
+      "name": "value"
+    },
+
+    {
+      "displayName": "Dates (x axis)",
+      "kind": "GroupingOrMeasure",
+      "name": "date"
+    },
+
+    {
+      "displayName": "Identifier (e.g. KPI Name)",
+      "kind": "GroupingOrMeasure",
+      "name": "what"
+    },
+
+    {
+      "displayName": "Improvement Direction (increase or decrease)",
+      "kind": "GroupingOrMeasure",
+      "name": "improvement_direction"
+    },
+
+    {
+      "displayName": "Target (OPTIONAL)",
+      "kind": "GroupingOrMeasure",
+      "name": "target"
+    },
+
+
+    {
+      "displayName": "Recalculation Points (OPTIONAL)",
+      "kind": "GroupingOrMeasure",
+      "name": "recalc_here"
+    },
+
+    {
+      "displayName": "Annotations (OPTIONAL)",
+      "kind": "GroupingOrMeasure",
+      "name": "comment"
+    },
+
+    {
+      "displayName": "Baseline Duration (OPTIONAL)",
+      "kind": "GroupingOrMeasure",
+      "name": "baseline_duration"
     }
+
+
   ],
   "dataViewMappings": [
     {
+      "conditions": [
+        {
+          "value": {
+            "max": 1
+          },
+          "date": {
+            "max": 1
+          },
+          "what": {
+            "max": 1
+          },
+          "improvement_direction": {
+            "max": 1
+          },
+          "recalc_here": {
+            "max": 1
+          },
+          "comment": {
+            "max": 1
+          },
+          "baseline_duration": {
+            "max": 1
+          },
+          "target": {
+            "max": 1
+          }
+        }
+
+
+
+
+      ],
       "scriptResult": {
         "dataInput": {
           "table": {
@@ -15,7 +92,42 @@
               "select": [
                 {
                   "for": {
-                    "in": "Values"
+                    "in": "value"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "date"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "what"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "improvement_direction"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "recalc_here"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "comment"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "baseline_duration"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "target"
                   }
                 }
               ],

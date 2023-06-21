@@ -42,6 +42,16 @@ libraryRequireInstall("DT")
 #           mutate(date = lubridate::dmy(date))
 
 
+if(exists("value")) value <- value else value <- NULL
+if(exists("date")) date <- date else date <- NULL
+if(exists("what")) what <- what else what <- NULL
+if(exists("improvement_direction")) improvement_direction <- improvement_direction else improvement_direction <- NULL
+if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
+if(exists("comment")) comment <- comment else comment <- NULL
+if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
+if(exists("target")) target <- target else target <- NULL
+
+Values <- cbind(value, date, what, improvement_direction, target, recalc_here, comment, baseline_duration)
 
 
 dataset <- Values %>% 
