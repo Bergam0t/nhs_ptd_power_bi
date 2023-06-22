@@ -321,7 +321,7 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   
   if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
   
-  if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "bottom"
+  if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "below"
   
   if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
   
