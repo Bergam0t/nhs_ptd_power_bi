@@ -176,6 +176,10 @@
                 "value": "graph"
               },
               {
+                "displayName": "FacetedGraph",
+                "value": "facet_graph"
+              },
+              {
                 "displayName": "Card",
                 "value": "card"
               },

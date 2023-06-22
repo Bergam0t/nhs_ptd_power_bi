@@ -68,12 +68,32 @@ colnames(Values) <- c("value", "date", "what", "improvement_direction", "target"
 dataset <- Values %>% 
     mutate(date = as.Date(date)) 
 
+
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
-if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputType == "summarymatrix") {
-  
+
+# Set up palette using NHS identity colours for point types
+# TODO: add in support for neutral variation
+palette <- c("Special Cause - Concern" = "#ED8B00",
+              "Special Cause - Improvement" = "#41B6E6",
+              "Common Cause" = "#768692")
+
+if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
+
+if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "below"
+
+if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
+
+
+##########################################################
+# Begin calculations for instances where we pass in 
+# multiple datasets and don't want them aggregated
+##########################################################
+
+if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputType == "summarymatrix" | outputtypesettings_OutputType == "facet_graph") {
   
   ptd_objects <- list()
+  ptd_objects_tibble <- list()
   
   for (what in 1:nrow(dataset %>% distinct(what))) { 
   
@@ -136,9 +156,13 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
       point_type == "special_cause_improvement" ~ "Special Cause - Improvement",
       point_type == "common_cause" ~ "Common Cause",
       TRUE ~ "ERROR - CHECK"
-    )) 
+    )) %>% 
+    mutate(title = what_item)
   
-  
+  # Store this for use in the faceted graph
+  ptd_objects_tibble[[what_item]] <- ptd_df
+
+  # Now do some additional processing to make it more useful for the graph-type plots
   if (!is.na(ptd_df %>% distinct(target) %>% pull())) assurance_type <- ptd_calculate_assurance_type_2(ptd_df, improvement_direction) %>% select(assurance_type) %>% pull() else assurance_type <- ""
   
   final_row <- ptd_df %>% arrange(x) %>% tail(1)
@@ -172,6 +196,228 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
     bind_rows() 
   
  
+}
+
+if (outputtypesettings_OutputType == "facet_graph") {
+
+spc_plots <- list()
+
+  for (j in 1:length(ptd_objects_tibble)) {
+
+      ptd_object <- ptd_objects_tibble[[j]]
+
+      fig <- plot_ly(ptd_object,
+                      x = ~x,
+                      colors = palette)
+        
+        fig <- fig %>%
+          # Add the main line for the data
+          add_trace(y = ~y, 
+                    name = 'trace 0',
+                    type="scatter",
+                    mode = 'lines', 
+                    line=list(color='#768692'),
+                    showlegend=FALSE) %>%
+          # Add in markers for the data, colouring by the point types
+          # and using the palette we passed when initialising the figure
+          add_trace(y = ~y,
+                    type="scatter",
+                    mode = 'markers', 
+                    color = ~point_type, 
+                    showlegend=showLegend,
+                    marker=list(size=pointsettings_PointSize)
+        ) %>%
+          # Add in line for lower process limit
+          add_trace(y = ~lpl, 
+                    name = 'Lower Process Limit',
+                    type="scatter",
+                    mode = 'lines', 
+                    line=list(color='#231f20', dash="dot"),
+                    showlegend=FALSE) %>%
+          # Add in line for upper process limit
+          add_trace(y = ~upl, 
+                    name = 'Upper Process Limit',
+                    type="scatter",
+                    mode = 'lines', 
+                    line=list(color='#231f20', dash="dot"),
+                    showlegend=FALSE) %>%
+          # Add in line for mean
+          # TODO: Investigate whether this should be median. Median doesn't appear in plot
+          # but I thought that was MDC methodology - I'm probably misremembering.
+          add_trace(y = ~mean, name = 'Mean',
+                    type="scatter",
+                    mode = 'lines', 
+                    line=list(color='#231f20'),
+                    showlegend=FALSE)
+        
+
+       target <- ptd_object %>%
+          tail(1) %>%
+          select(target) %>%
+          pull()
+      
+      if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+
+      if (is.null(target) & !is.null(spcsettings_Target)) target <- spcsettings_Target
+
+        # If a target is provided, add in a line for the target
+        if (!is.null(target)) {
+          fig <- fig %>%
+            add_trace(y = ~target, name = 'Target',
+                      type="scatter",
+                      mode = 'lines', 
+                      line=list(color='#DA291C', dash="dot"),
+                      showlegend=FALSE)
+        }
+        
+        # Calculate variation type by looking at final point in ptd object
+        variation_type <- ptd_object %>%
+          tail(1) %>%
+          select(point_type) %>%
+          pull()
+        
+        # Get variation image paths
+        # Variation image relies on both the value of the most recent point
+        # and the direction that is counted as improvement
+        # Improvement direction was calculated earlier to pass to ptd arguments
+        # TODO: Add in support for 'neutral' improvement direction
+        if(variation_type == "Special Cause - Concern" & improvement_direction == "decrease") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_high.svg"
+        if(variation_type == "Special Cause - Concern" & improvement_direction == "increase") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_low.svg"
+        if(variation_type == "Special Cause - Improvement" & improvement_direction == "decrease") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_low.svg"
+        if(variation_type == "Special Cause - Improvement" & improvement_direction == "increase") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_high.svg"
+        if(variation_type == "Common Cause") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/common_cause.svg"
+        
+        
+        # Get assurance image paths
+        # NHS R PTD package provides a helper function for calculating this from the PTD object
+        if (!is.null(target)) {
+        
+        assurance_type <- ptd_calculate_assurance_type_2(ptd_object, improvement_direction) %>% select(assurance_type) %>% pull()
+        
+        if(assurance_type == "inconsistent") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/inconsistent.svg"
+        if(assurance_type =="consistent_pass") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/pass.svg"
+        if(assurance_type == "consistent_fail") assurance_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/fail.svg"
+        
+        }
+        
+        if (is.null(target)) assurance_image <- ""
+        
+        # Get settings from power bi visual formatting options
+        if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
+        if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
+        
+        if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
+        
+        if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
+        
+        if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
+
+        if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
+
+ 
+        # If using default title in a card visual, wrap it
+        title <- ptd_object %>%
+          tail(1) %>%
+          select(title) %>%
+          pull()
+
+          fig <- fig %>%
+          layout(
+
+          xaxis = list(title = xaxissettings_XAxisTitle),
+          yaxis = list(title = yaxissettings_YAxisTitle),
+
+
+            annotations=list(
+                    text=stringr::str_wrap(title, 25),
+                      font=list(size=titlesettings_TitleSize),
+                      x = 0.5,  
+                      y = 1.0,  
+                      xref = "paper",  
+                      yref = "paper",  
+                      xanchor = "center",  
+                      yanchor = "bottom",  
+                      showarrow = FALSE 
+                      ),
+
+            # Add in icons for variation and, if target present, assurance
+            # Note that assurance will not always be present, so place variation icon
+            # in the far left top hand corner and assurance to the right of it if present
+            # Try to get these as far out of the way as possible
+            # TODO: add in user options for icon placement
+
+            # Useful reference for images:
+            # https://plotly.com/r/reference/layout/images/
+            # https://plotly.com/r/images/
+
+            # TODO: Work out how to add a tooltip explaining the meaning of the icons on hover.
+            # From docs, doesn't appear to be something we can add directly to the images
+            # Think we will need an invisible point where the images are
+            # but this could be tricky to achieve because of the way the image locations
+            # and sizes are set.
+
+            # TODO: Have not yet verified whether the images work when visual is running on
+            # PBI service rather than PBI desktop. Plotly seems to only accept images from web source,
+            # but I worry that PBI service will block these requests. Note to self - would base64
+            # encoding of the images work if required? Or look into plotly source code at what
+            # exactly is happening at this step - what aspect of it being 'on the web' is crucial?
+            # Because we can include additional assets in the pbi visual package so I don't think
+            # that's an issue.
+
+            images = list(
+
+              list(
+                source =  assurance_image,
+                xref="paper",
+                yref="paper",
+                x=0.22  ,
+                y=1.05,
+              xanchor="right",
+              yanchor="top",
+              sizex=iconsettings_IconSize,
+              sizey=iconsettings_IconSize
+              ) ,
+
+              list(
+
+                source =  variation_image,
+                xref="paper",
+                yref="paper",
+                x=0.1,
+                y=1.05,
+                xanchor="right",
+                yanchor="top",
+                sizex=iconsettings_IconSize,
+                sizey=iconsettings_IconSize
+
+              )
+
+            )
+          )
+        
+        if (legendsettings_LegendPosition == "below") {
+        
+          fig <- fig %>%
+            layout(legend = list(orientation = 'h', 
+                        x=0.5, 
+                        y=-0.175, 
+                        #yref="container", 
+                        xanchor="center",
+                        itemsizing="constant"
+                        )
+          )
+
+        }
+
+    spc_plots[[j]] <- fig
+
+
+  }
+
+
+  fig <- subplot(spc_plots, shareX=TRUE, shareY=TRUE)
+  # fig <- spc_plots[[4]]
+
 }
 
 if (outputtypesettings_OutputType == "summarytable") {
@@ -223,7 +469,6 @@ if (outputtypesettings_OutputType == "summarymatrix") {
   
   # Create any missing columns
   
-  
   fig <- summary_matrix %>%
     DT::datatable(filter='none', 
                   escape=FALSE,
@@ -235,11 +480,9 @@ if (outputtypesettings_OutputType == "summarymatrix") {
                   )
                   )%>% 
     DT::formatStyle(columns = c(" "), fontWeight = 'bold', `text-align` = 'left')
-
-  
+    
   
 }
-
 
 if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == "card") {
 
@@ -309,21 +552,6 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
     
   # p <- ptd_object %>%
   #      DT::datatable()
-  
-  # Set up palette using NHS identity colours for point types
-  # TODO: add in support for neutral variation
-  palette <- c("Special Cause - Concern" = "#ED8B00",
-               "Special Cause - Improvement" = "#41B6E6",
-               "Common Cause" = "#768692")
-  
-  
-  
-  
-  if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
-  
-  if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "below"
-  
-  if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
   
   # Initialise the plotly figure
   fig <- plot_ly(ptd_object,
