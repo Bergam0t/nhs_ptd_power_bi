@@ -73,6 +73,7 @@ export class VisualSettings extends DataViewObjectsParser {
     export class SPCSettings {
       public ImprovementDirection: string = "increase"
       public Target: number = null;
+      public ValueIsPercentage: boolean = false;
       }
 
     export class ChartSettings {

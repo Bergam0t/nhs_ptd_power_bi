@@ -316,7 +316,6 @@ spc_plots <- list()
 
         if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
 
- 
         # If using default title in a card visual, wrap it
         title <- ptd_object %>%
           tail(1) %>%
@@ -684,13 +683,18 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
 if (outputtypesettings_OutputType == "graph") {
   
 
+if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- ""
+
+if (spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+
 # Update fig to include variation icon and, if present, assurance icon
 # Also pass in user parameters from the PBI visual formatting options for titles
   fig <- fig %>%
     layout(
 
     xaxis = list(title = xaxissettings_XAxisTitle),
-    yaxis = list(title = yaxissettings_YAxisTitle),
+    yaxis = list(title = yaxissettings_YAxisTitle,
+                       tickformat = tickhoverformat),
 
 
       title=list(text=title,
@@ -782,6 +786,12 @@ if (outputtypesettings_OutputType == "graph") {
   if(exists("cardsettings_IconPosition")) cardsettings_IconPosition <- cardsettings_IconPosition else cardsettings_IconPosition <- "central"
   if(exists("cardsettings_CardTitleJustification")) cardsettings_CardTitleJustification <- cardsettings_CardTitleJustification else cardsettings_CardTitleJustification <- "central"
   
+
+  if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- ""
+
+if (spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+
+
   m <- list(
     
     l = 10,
@@ -804,11 +814,9 @@ if (outputtypesettings_OutputType == "graph") {
    xaxis = list(title = "", showticklabels=FALSE, showgrid=FALSE),
    
    yaxis = list(title = "", showticklabels=FALSE, showgrid=FALSE,
-                zerolinecolor = '#ffff')#,
+                zerolinecolor = '#ffff',
+                hoverformat = tickhoverformat)
    
-   
-
-  
     ) %>% 
     config(displayModeBar = FALSE)
  
@@ -843,6 +851,7 @@ if (outputtypesettings_OutputType == "graph") {
 
   if (titlesettings_TitleOn == TRUE) {
   
+
   card_title <- list(text=title,
                font=list(size=titlesettings_TitleSize*3),
                #automargin=TRUE,
@@ -858,6 +867,15 @@ if (outputtypesettings_OutputType == "graph") {
   card_title <- NULL
 
   }
+
+
+  card_text <- dataset %>% 
+        arrange(desc(date)) %>% 
+        head(1) %>% 
+        select(value) %>% 
+        pull()
+
+  if (tickhoverformat == ',.0%') card_text <- paste0((card_text * 100) %>% round(1), "%")
   
   
   fig_icons <- plotly_empty() %>% 
@@ -886,7 +904,7 @@ if (outputtypesettings_OutputType == "graph") {
         xanchor="center",
         yanchor="top",
         sizex=iconsettings_IconSize*4,
-        sizey=iconsettings_IconSize*4
+        sizey=iconsettings_IconSize*4 
         
       )
     ),
@@ -900,11 +918,7 @@ if (outputtypesettings_OutputType == "graph") {
       
       y = 0.7,
       
-      text = dataset %>% 
-        arrange(desc(date)) %>% 
-        head(1) %>% 
-        select(value) %>% 
-        pull() %>% 
+      text = card_text %>% 
         paste0(
           cardsettings_CardPrefix,
           .,

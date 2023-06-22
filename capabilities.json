@@ -201,6 +201,14 @@
       "displayName": "SPC Settings",
       "description": "SPC Settings",
       "properties": {
+        "ValueIsPercentage": {
+          "displayName": "Value is %?",
+          "description": "If your percentage is stored as a decimal between 0 and 1, make it display more clearly.",
+          "type": {
+            "bool": true
+          }
+        },
+
         "ImprovementDirection": {
           "displayName": "Manually Set Improvement Direction (if improvement direction column not provided)",
           "description": "If improvement direction is not provided in the dataset, you can set it here.",
@@ -299,6 +307,7 @@
     "displayName": "Y Axis Settings",
     "description": "Y Axis theme and title",
     "properties": {
+
       "YAxisTitle": {
         "displayName": "Y Axis Title",
         "description": "Set Y Axis Title",
@@ -306,6 +315,7 @@
           "text": true
         }
       }
+      
   }
 },
 
