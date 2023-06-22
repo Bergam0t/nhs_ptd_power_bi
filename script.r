@@ -255,6 +255,8 @@ spc_plots <- list()
           tail(1) %>%
           select(target) %>%
           pull()
+
+      if (is.na(target)) target <- NULL
       
       if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
 
