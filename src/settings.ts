@@ -56,6 +56,8 @@ export class VisualSettings extends DataViewObjectsParser {
 
       public cardsettings: CardSettings = new CardSettings();
 
+      public facetsettings: FacetSettings = new FacetSettings();
+
     }
 
 
@@ -110,4 +112,10 @@ export class VisualSettings extends DataViewObjectsParser {
       public ValueSize: number = 48;
       public IconPosition: string = "central";
       public CardTitleJustification: string = "central";
+      }
+
+      export class FacetSettings {
+
+        public NumRows: number = 1;
+  
       }

@@ -417,7 +417,12 @@ spc_plots <- list()
   }
 
 
-  fig <- subplot(spc_plots, shareX=TRUE, shareY=TRUE)
+
+  if(exists("facetsettings_NumRows")) facetsettings_NumRows <- facetsettings_NumRows else facetsettings_NumRows <- 1
+
+  if (facetsettings_NumRows == 1) margin_facet <- 0.02 else margin_facet <- c(0.02, 0.02, 0.1, 0.02)  
+
+  fig <- subplot(spc_plots, shareX=TRUE, shareY=TRUE, nrows=facetsettings_NumRows, margin=margin_facet)
   # fig <- spc_plots[[4]]
 
 }

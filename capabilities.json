@@ -430,6 +430,20 @@
 }
 },
 
+"facetsettings": {
+  "displayName": "Facet Settings",
+  "description": "Facet graph output settings",
+  "properties": {
+    "NumRows": {
+      "displayName": "Number of Rows",
+      "description": "Set number of rows to split the faceted plot into",
+      "type": {
+        "numeric": true
+      }
+    }
+}
+},
+
 
     "rcv_script": {
       "properties": {
