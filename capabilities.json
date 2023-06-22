@@ -75,6 +75,9 @@
           "improvement_direction": {
             "max": 1
           },
+          "target": {
+            "max": 1
+          },
           "recalc_here": {
             "max": 1
           },
@@ -82,9 +85,6 @@
             "max": 1
           },
           "baseline_duration": {
-            "max": 1
-          },
-          "target": {
             "max": 1
           }
         }
@@ -115,6 +115,11 @@
                 },
                 {
                   "for": {
+                    "in": "target"
+                  }
+                },
+                {
+                  "for": {
                     "in": "improvement_direction"
                   }
                 },
@@ -131,11 +136,6 @@
                 {
                   "for": {
                     "in": "baseline_duration"
-                  }
-                },
-                {
-                  "for": {
-                    "in": "target"
                   }
                 }
               ],

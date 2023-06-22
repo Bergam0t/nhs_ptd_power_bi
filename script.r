@@ -63,8 +63,10 @@ if(!is.null(recalc_here)) Values <- bind_cols(Values, recalc_here) else Values <
 if(!is.null(baseline_duration)) Values <- bind_cols(Values, baseline_duration) else Values <- Values %>% mutate(baseline_duration = NA)
 
 
+colnames(Values) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "baseline_duration") 
+
 dataset <- Values %>% 
-    mutate(date = as.Date(date))
+    mutate(date = as.Date(date)) 
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
