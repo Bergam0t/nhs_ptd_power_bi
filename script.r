@@ -200,6 +200,10 @@ if (outputtypesettings_OutputType == "summarytable" | outputtypesettings_OutputT
 
 if (outputtypesettings_OutputType == "facet_graph") {
 
+if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- ""
+
+if (spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+
 spc_plots <- list()
 
   for (j in 1:length(ptd_objects_tibble)) {
@@ -326,7 +330,8 @@ spc_plots <- list()
           layout(
 
           xaxis = list(title = xaxissettings_XAxisTitle),
-          yaxis = list(title = yaxissettings_YAxisTitle),
+          yaxis = list(title = yaxissettings_YAxisTitle,
+                      tickformat=tickhoverformat),
 
 
             annotations=list(
