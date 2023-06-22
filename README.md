@@ -8,12 +8,6 @@ statistical process control (SPC) charts.
 
 ![](man/figures/README-example-powerbi-rebase.png)
 
-**!! At the moment this only works in the PowerBI desktop application -
-while this may be useful for automating the reporting of some KPIs as it
-is possible to export the resulting files to PDF, work is ongoing to
-make this visual work in the PowerBI service so it can be used more
-widely within organisations !!**
-
 All calculations feeding into the visual are powered by R code written
 by package is built by the [NHS-R community](https://nhsrcommunity.com)
 in the NHSRplotthedots package.
@@ -62,7 +56,7 @@ An example PowerBI file is available in **pbi\_example\_file/**
 
 The visual should appear in your list of available visuals. Click on the
 icon to add a blank visual to the page. With the visual selected, drag
-all fields from your dataset into your ‘values’ section.
+all fields from your dataset into the relevant sections.
 
 ![](man/figures/README-example-powerbi-variables.png)
 
@@ -109,6 +103,14 @@ Table’ to get a table like the one below.
 
 ![](man/figures/README-example-kpi-summary.png)
 
+## Faceted Graph
+
+If passing multiple KPIs, from the ‘Output Options’ select ‘Faceted
+Graph’ to get a graph like the one below. The number of rows can be
+edited.
+
+![](man/figures/README-example-faceted_graph.png)
+
 # Information for Collaborators
 
 ## Key parts of the custom PowerBI visual
@@ -145,7 +147,11 @@ packages are currently suppported on the PowerBI service.
 
 ## How to tweak the plotly implementation
 
-The file `script.R` is the key file for All underlying files use the
+The file `script.R` in the root folder is the key file for the plotly
+implementation of this.
+
+All underlying R functions from the NHS R Plot the Dots package are
+stored in the R folder.
 
 ## How to add additional PowerBI visual formatting options
 
