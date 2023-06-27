@@ -53,8 +53,7 @@ if(exists("annotations")) annotations <- annotations else annotations <- NULL
 if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
 if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
 
-dataset <- cbind(value, date) %>% 
-  mutate(date = as.Date(date)) 
+dataset <- cbind(value, date) 
 
 if(!is.null(what)) dataset <- bind_cols(dataset, what) else dataset <- dataset %>% mutate(what = NA)
 if(!is.null(improvement_direction)) dataset <- bind_cols(dataset, improvement_direction) else dataset <- dataset %>% mutate(improvement_direction = NA)
@@ -70,6 +69,8 @@ if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- out
 if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "below"
 if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
 
+dataset <- dataset %>% 
+  mutate(date = as.Date(date)) 
 
 ##########################################################
 # Begin calculations for instances where we pass in 
