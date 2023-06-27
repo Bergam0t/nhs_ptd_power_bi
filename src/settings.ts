@@ -118,6 +118,6 @@ export class VisualSettings extends DataViewObjectsParser {
       export class FacetSettings {
 
         public NumRows: number = 1;
-        public FixedYAxisScale: boolean = false;
+        public FixedYAxisScale: boolean = true;
   
       }

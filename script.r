@@ -383,6 +383,11 @@ if (outputtypesettings_OutputType == "facet_graph") {
     if (facetsettings_NumRows == 1) margin_facet <- 0.02 else margin_facet <- c(0.02, 0.02, 0.08, 0.08)  
   
     fig <- subplot(spc_plots, shareX=TRUE, 
+                   # Limitation of R plotly - shareY argument works only by row
+                   # https://community.plotly.com/t/subplot-sharex-and-sharey-only-work-by-column-and-row/32532/2
+                   # https://stackoverflow.com/questions/57672160/plotly-scaley-not-working-across-subplot-rows
+                   # Python implementation allows use of additional 'all' argument but this doesn't appear to be 
+                   # supported in R: https://plotly.github.io/plotly.py-docs/plotly.subplots.html
                    shareY = if(exists("facetsettings_FixedYAxisScale")) facetsettings_FixedYAxisScale else FALSE, 
                    nrows=facetsettings_NumRows, margin=margin_facet)
 
