@@ -942,7 +942,7 @@ if (spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickho
 # ####################################################
 
 ############# Create and save widget ###############
-internalSaveWidget(fig, 'out.html');
+internalSaveWidget(fig %>% plotly::partial_bundle(local=FALSE), 'out.html');
 ####################################################
 
 ################ Reduce paddings ###################
