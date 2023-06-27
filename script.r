@@ -95,8 +95,8 @@ if (outputtypesettings_OutputType == "summarytable" |
   # Get any target values (if included)
   # If present, pass through to ptd target function
   if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
-  if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
-  if(is.na(target)) target <- spcsettings_Target
+  #if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+  #if(is.na(target)) target <- spcsettings_Target
   
   # Take improvement direction from where it is specified in original dataframe
   # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
@@ -238,9 +238,7 @@ if (outputtypesettings_OutputType == "facet_graph") {
             pull()
   
         if (is.na(target)) target <- NULL
-        
         if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
-  
         if (is.null(target) & !is.null(spcsettings_Target)) target <- spcsettings_Target
   
           # If a target is provided, add in a line for the target
@@ -288,14 +286,7 @@ if (outputtypesettings_OutputType == "facet_graph") {
           # Get settings from power bi visual formatting options
           if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
           if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
-          
-          if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
-          
-          if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
-          
-          if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
-  
-          if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
+                    if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
   
           # If using default title in a card visual, wrap it
           title <- ptd_object %>%
@@ -306,8 +297,8 @@ if (outputtypesettings_OutputType == "facet_graph") {
             fig <- fig %>%
             layout(
   
-            xaxis = list(title = xaxissettings_XAxisTitle),
-            yaxis = list(title = yaxissettings_YAxisTitle,
+            xaxis = list(title = if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle else ""),
+            yaxis = list(title = if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle else "",
                         tickformat=tickhoverformat),
   
   
@@ -357,8 +348,8 @@ if (outputtypesettings_OutputType == "facet_graph") {
                   y=1.05,
                 xanchor="right",
                 yanchor="top",
-                sizex=iconsettings_IconSize,
-                sizey=iconsettings_IconSize
+                sizex=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1,
+                sizey=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1
                 ) ,
   
                 list(
@@ -370,8 +361,8 @@ if (outputtypesettings_OutputType == "facet_graph") {
                   y=1.05,
                   xanchor="right",
                   yanchor="top",
-                  sizex=iconsettings_IconSize,
-                  sizey=iconsettings_IconSize
+                  sizex=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1,
+                  sizey=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1
   
                 )
   
@@ -608,8 +599,6 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   
   if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
   
-  if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
-  
 
   if (titlesettings_TitleOn == TRUE) {
 
@@ -689,8 +678,8 @@ if (outputtypesettings_OutputType == "graph") {
           y=1.05,
          xanchor="right",
          yanchor="top",
-         sizex=iconsettings_IconSize,
-         sizey=iconsettings_IconSize
+         sizex=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1,
+         sizey=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1
         ) ,
 
          list(
@@ -702,8 +691,8 @@ if (outputtypesettings_OutputType == "graph") {
           y=1.05,
           xanchor="right",
           yanchor="top",
-          sizex=iconsettings_IconSize,
-          sizey=iconsettings_IconSize
+          sizex=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1,
+          sizey=if(exists("iconsettings_IconSize")) iconsettings_IconSize else 0.1
 
         )
 
@@ -835,8 +824,8 @@ if (outputtypesettings_OutputType == "graph") {
         y=if(exists("cardsettings_IconPosition") && cardsettings_IconPosition == "central") 0.4 else 0.95,
         xanchor="center",
         yanchor="top",
-        sizex=iconsettings_IconSize*4,
-        sizey=iconsettings_IconSize*4
+        sizex=if(exists("iconsettings_IconSize")) iconsettings_IconSize*4 else 0.1*4,
+        sizey=if(exists("iconsettings_IconSize")) iconsettings_IconSize*4 else 0.1*4
       ) ,
       
       list(
@@ -848,8 +837,8 @@ if (outputtypesettings_OutputType == "graph") {
         y=if(exists("cardsettings_IconPosition") && cardsettings_IconPosition == "central") 0.4 else 0.45,
         xanchor="center",
         yanchor="top",
-        sizex=iconsettings_IconSize*4,
-        sizey=iconsettings_IconSize*4 
+        sizex=if(exists("iconsettings_IconSize")) iconsettings_IconSize*4 else 0.1*4,
+        sizey=if(exists("iconsettings_IconSize")) iconsettings_IconSize*4 else 0.1*4
         
       )
     ),
@@ -902,7 +891,7 @@ if (outputtypesettings_OutputType == "graph") {
 # ####################################################
 
 ############# Create and save widget ###############
-internalSaveWidget(fig %>% plotly::partial_bundle(local=FALSE), 'out.html');
+internalSaveWidget(if(outputtypesettings_OutputType != "summarytable" & outputtypesettings_OutputType != "summarymatrix") fig %>% plotly::partial_bundle(local=FALSE) else fig, 'out.html');
 ####################################################
 
 ################ Reduce paddings ###################
