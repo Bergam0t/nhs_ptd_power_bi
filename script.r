@@ -45,22 +45,15 @@ libraryRequireInstall("DT")
 if(exists("value")) value <- value else value <- NULL
 if(exists("date")) date <- date else date <- NULL
 
-# Import the optional columns
-if(exists("what")) what <- what else what <- NULL
-if(exists("improvement_direction")) improvement_direction <- improvement_direction else improvement_direction <- NULL
-if(exists("target")) target <- target else target <- NULL
-if(exists("annotations")) annotations <- annotations else annotations <- NULL
-if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
-if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
-
 dataset <- cbind(value, date) 
 
-if(!is.null(what)) dataset <- bind_cols(dataset, what) else dataset <- dataset %>% mutate(what = NA)
-if(!is.null(improvement_direction)) dataset <- bind_cols(dataset, improvement_direction) else dataset <- dataset %>% mutate(improvement_direction = NA)
-if(!is.null(target)) dataset <- bind_cols(dataset, target) else dataset <- dataset %>% mutate(target = NA)
-if(!is.null(annotations)) dataset <- bind_cols(dataset, annotations) else dataset <- dataset %>% mutate(annotations = NA)
-if(!is.null(recalc_here)) dataset <- bind_cols(dataset, recalc_here) else dataset <- dataset %>% mutate(recalc_here = NA)
-if(!is.null(baseline_duration)) dataset <- bind_cols(dataset, baseline_duration) else dataset <- dataset %>% mutate(baseline_duration = NA)
+# Import the optional columns
+if(exists("what") && !is.null(what)) dataset <- bind_cols(dataset, what) else dataset <- dataset %>% mutate(what = NA)
+if(exists("improvement_direction") && !is.null(improvement_direction)) dataset <- bind_cols(dataset, improvement_direction) else dataset <- dataset %>% mutate(improvement_direction = NA)
+if(exists("target") && !is.null(target)) dataset <- bind_cols(dataset, target) else dataset <- dataset %>% mutate(target = NA)
+if(exists("annotations") && !is.null(annotations)) dataset <- bind_cols(dataset, annotations) else dataset <- dataset %>% mutate(annotations = NA)
+if(exists("recalc_here") && !is.null(recalc_here)) dataset <- bind_cols(dataset, recalc_here) else dataset <- dataset %>% mutate(recalc_here = NA)
+if(exists("baseline_duration") && !is.null(baseline_duration)) dataset <- bind_cols(dataset, baseline_duration) else dataset <- dataset %>% mutate(baseline_duration = NA)
 
 colnames(dataset) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "baseline_duration") 
 
