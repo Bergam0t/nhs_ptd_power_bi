@@ -53,9 +53,10 @@ if(exists("improvement_direction") && !is.null(improvement_direction)) dataset <
 if(exists("target") && !is.null(target)) dataset <- bind_cols(dataset, target) else dataset <- dataset %>% mutate(target = NA)
 if(exists("annotations") && !is.null(annotations)) dataset <- bind_cols(dataset, annotations) else dataset <- dataset %>% mutate(annotations = NA)
 if(exists("recalc_here") && !is.null(recalc_here)) dataset <- bind_cols(dataset, recalc_here) else dataset <- dataset %>% mutate(recalc_here = NA)
+if(exists("is_percentage") && !is.null(is_percentage)) dataset <- bind_cols(dataset, is_percentage) else dataset <- dataset %>% mutate(is_percentage = NA)
 if(exists("baseline_duration") && !is.null(baseline_duration)) dataset <- bind_cols(dataset, baseline_duration) else dataset <- dataset %>% mutate(baseline_duration = NA)
 
-colnames(dataset) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "baseline_duration") 
+colnames(dataset) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "is_percentage", "baseline_duration") 
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
@@ -600,14 +601,21 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
 
   }
 
+  
+  # Look at the dataset to determine whether something has been passed that tells us it's a percentage
+  # If not, look at the SPC settings
+  if(is.na(unique(dataset$is_percentage))) is_percentage <- NULL else is_percentage <- unique(dataset$is_percentage)
+  if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
+  if (is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
+  
+  if (is_percentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
 
 }
 
 if (outputtypesettings_OutputType == "graph") {
   
-  if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
-
-  # Update fig to include variation icon and, if present, assurance icon
+  
+    # Update fig to include variation icon and, if present, assurance icon
   # Also pass in user parameters from the PBI visual formatting options for titles
   fig <- fig %>%
     layout(

@@ -44,6 +44,13 @@
     },
 
     {
+      "displayName": "Is value a percentage? (OPTIONAL)",
+      "description": "Optional for all visual types. Can be used to automatically determine whether a value is interpreted as a percentage.",
+      "kind": "GroupingOrMeasure",
+      "name": "is_percentage"
+    },
+
+    {
       "displayName": "Annotations (OPTIONAL)",
       "description": "Optional for all visual types. Will only be included in standard graph.",
       "kind": "GroupingOrMeasure",
@@ -79,6 +86,9 @@
             "max": 1
           },
           "recalc_here": {
+            "max": 1
+          },
+          "is_percentage": {
             "max": 1
           },
           "annotations": {
@@ -126,6 +136,11 @@
                 {
                   "for": {
                     "in": "recalc_here"
+                  }
+                },
+                {
+                  "for": {
+                    "in": "is_percentage"
                   }
                 },
                 {
