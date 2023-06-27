@@ -450,6 +450,13 @@
       "type": {
         "numeric": true
       }
+    },
+    "FixedYAxisScale": {
+      "displayName": "Fixed Y Axis Scale",
+      "description": "Determine whether Y axis is fixed across facets or allowed to vary",
+      "type": {
+        "bool": true
+      }
     }
 }
 },

@@ -53,19 +53,17 @@ if(exists("annotations")) annotations <- annotations else annotations <- NULL
 if(exists("recalc_here")) recalc_here <- recalc_here else recalc_here <- NULL
 if(exists("baseline_duration")) baseline_duration <- baseline_duration else baseline_duration <- NULL
 
-Values <- cbind(value, date)
+dataset <- cbind(value, date) %>% 
+  mutate(date = as.Date(date)) 
 
-if(!is.null(what)) Values <- bind_cols(Values, what) else Values <- Values %>% mutate(what = NA)
-if(!is.null(improvement_direction)) Values <- bind_cols(Values, improvement_direction) else Values <- Values %>% mutate(improvement_direction = NA)
-if(!is.null(target)) Values <- bind_cols(Values, target) else Values <- Values %>% mutate(target = NA)
-if(!is.null(annotations)) Values <- bind_cols(Values, annotations) else Values <- Values %>% mutate(annotations = NA)
-if(!is.null(recalc_here)) Values <- bind_cols(Values, recalc_here) else Values <- Values %>% mutate(recalc_here = NA)
-if(!is.null(baseline_duration)) Values <- bind_cols(Values, baseline_duration) else Values <- Values %>% mutate(baseline_duration = NA)
+if(!is.null(what)) dataset <- bind_cols(dataset, what) else dataset <- dataset %>% mutate(what = NA)
+if(!is.null(improvement_direction)) dataset <- bind_cols(dataset, improvement_direction) else dataset <- dataset %>% mutate(improvement_direction = NA)
+if(!is.null(target)) dataset <- bind_cols(dataset, target) else dataset <- dataset %>% mutate(target = NA)
+if(!is.null(annotations)) dataset <- bind_cols(dataset, annotations) else dataset <- dataset %>% mutate(annotations = NA)
+if(!is.null(recalc_here)) dataset <- bind_cols(dataset, recalc_here) else dataset <- dataset %>% mutate(recalc_here = NA)
+if(!is.null(baseline_duration)) dataset <- bind_cols(dataset, baseline_duration) else dataset <- dataset %>% mutate(baseline_duration = NA)
 
-colnames(Values) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "baseline_duration") 
-
-dataset <- Values %>% 
-    mutate(date = as.Date(date)) 
+colnames(dataset) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "baseline_duration") 
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
@@ -84,88 +82,87 @@ if (outputtypesettings_OutputType == "summarytable" |
   
   ptd_objects <- list()
   ptd_objects_tibble <- list()
-  
+
   for (what in 1:nrow(dataset %>% distinct(what))) { 
   
-  what_item <- (dataset %>% distinct(what) %>% pull())[[what]]
-    
-  single_what <- dataset %>% 
-    filter(what == what_item) 
-
-  # Get any target values (if included)
-  # If present, pass through to ptd target function
-  if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
-  #if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
-  #if(is.na(target)) target <- spcsettings_Target
-  
-  # Take improvement direction from where it is specified in original dataframe
-  # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
-  # My current thinking is that while dataframe is inefficient for storage, it's far more efficient for creating 
-  # a lot of visuals at once 
-  improvement_direction <- single_what %>% 
-    tail(1) %>% 
-    select(improvement_direction) %>% 
-    distinct() %>% 
-    pull() %>% 
-    # Force as character to appease the PBI service
-    as.character()
-  
-  # If no improvement direction passed in the dataset, take the value from the dropdown instead
-  # Note default in dropdown is "increase", in line with SPC defaults
-  if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
-  if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
-  
-  # Generate NHS R making data count object
-  ptd_df <- ptd_spc(single_what, 
-                        value_field = "value",
-                        date_field="date", 
-                        improvement_direction = improvement_direction,
-                        fix_after_n_points = if(is.na(unique(single_what$baseline_duration))) NULL else unique(single_what$baseline_duration),
-                        rebase = if((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
-                        target = target
-  ) %>% 
-    # We want the underlying dataframe rather than the resulting plot
-    # so convert to tibble
-    as_tibble() %>% 
-    # Tweak point type text for nicer display
-    mutate(point_type = case_when(
-      point_type == "special_cause_concern" ~ "Special Cause - Concern",
-      point_type == "special_cause_improvement" ~ "Special Cause - Improvement",
-      point_type == "common_cause" ~ "Common Cause",
-      TRUE ~ "ERROR - CHECK"
-    )) %>% 
-    mutate(title = what_item)
-  
-  # Store this for use in the faceted graph
-  ptd_objects_tibble[[what_item]] <- ptd_df
-
-  # Now do some additional processing to make it more useful for the graph-type plots
-  if (!is.na(ptd_df %>% distinct(target) %>% pull())) assurance_type <- ptd_calculate_assurance_type_2(ptd_df, improvement_direction) %>% select(assurance_type) %>% pull() else assurance_type <- ""
-  
-  final_row <- ptd_df %>% arrange(x) %>% tail(1)
-    
-  ptd_objects[[what]] <- tibble(
-    What = what_item,
-    `Most Recent Data Point` =  final_row %>% pull(x),
-    `Most Recent Value` =  final_row %>% pull(y),
-    Mean = final_row %>% pull(mean),
-    `Lower Process Limit` = final_row %>% pull(lpl),
-    `Upper Process Limit` = final_row %>% pull(upl),
-    `Target` = final_row %>% pull(target),
-    `Variation` = final_row %>% pull(point_type),
-    `Assurance` = assurance_type 
-    
-    
-  ) %>% 
-    mutate(Assurance = case_when(
+    what_item <- (dataset %>% distinct(what) %>% pull())[[what]]
       
-      Assurance == "consistent_pass" ~ "Consistently Meeting Target",
-      Assurance == "inconsistent" ~ "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target",
-      Assurance == "consistent_fail" ~ "Consistently Failing to Meet Target",
-      Assurance == "" ~ "No Target",
-      TRUE ~ "ERROR - Check"
+    single_what <- dataset %>% 
+      filter(what == what_item) 
+  
+    # Get any target values (if included)
+    # If present, pass through to ptd target function
+    if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
+    #if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+    #if(is.na(target)) target <- spcsettings_Target
+    
+    # Take improvement direction from where it is specified in original dataframe
+    # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
+    # My current thinking is that while dataframe is inefficient for storage, it's far more efficient for creating 
+    # a lot of visuals at once 
+    improvement_direction <- single_what %>% 
+      tail(1) %>% 
+      select(improvement_direction) %>% 
+      distinct() %>% 
+      pull() %>% 
+      # Force as character to appease the PBI service
+      as.character()
+    
+    # If no improvement direction passed in the dataset, take the value from the dropdown instead
+    # Note default in dropdown is "increase", in line with SPC defaults
+    if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
+    if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
+    
+    # Generate NHS R making data count object
+    ptd_df <- ptd_spc(single_what, 
+                          value_field = "value",
+                          date_field="date", 
+                          improvement_direction = improvement_direction,
+                          fix_after_n_points = if(is.na(unique(single_what$baseline_duration))) NULL else unique(single_what$baseline_duration),
+                          rebase = if((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
+                          target = target
+    ) %>% 
+      # We want the underlying dataframe rather than the resulting plot
+      # so convert to tibble
+      as_tibble() %>% 
+      # Tweak point type text for nicer display
+      mutate(point_type = case_when(
+        point_type == "special_cause_concern" ~ "Special Cause - Concern",
+        point_type == "special_cause_improvement" ~ "Special Cause - Improvement",
+        point_type == "common_cause" ~ "Common Cause",
+        TRUE ~ "ERROR - CHECK"
+      )) %>% 
+      mutate(title = what_item)
+    
+    # Store this for use in the faceted graph
+    ptd_objects_tibble[[what_item]] <- ptd_df
+  
+    # Now do some additional processing to make it more useful for the graph-type plots
+    if (!is.na(ptd_df %>% distinct(target) %>% pull())) assurance_type <- ptd_calculate_assurance_type_2(ptd_df, improvement_direction) %>% select(assurance_type) %>% pull() else assurance_type <- ""
+    
+    final_row <- ptd_df %>% arrange(x) %>% tail(1)
       
-    ))
+    ptd_objects[[what]] <- tibble(
+      What = what_item,
+      `Most Recent Data Point` =  final_row %>% pull(x),
+      `Most Recent Value` =  final_row %>% pull(y),
+      Mean = final_row %>% pull(mean),
+      `Lower Process Limit` = final_row %>% pull(lpl),
+      `Upper Process Limit` = final_row %>% pull(upl),
+      `Target` = final_row %>% pull(target),
+      `Variation` = final_row %>% pull(point_type),
+      `Assurance` = assurance_type 
+      
+    ) %>% 
+      mutate(Assurance = case_when(
+        
+        Assurance == "consistent_pass" ~ "Consistently Meeting Target",
+        Assurance == "inconsistent" ~ "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target",
+        Assurance == "consistent_fail" ~ "Consistently Failing to Meet Target",
+        Assurance == "" ~ "No Target",
+        TRUE ~ "ERROR - Check"
+        
+      ))
   
   }
   
@@ -391,7 +388,9 @@ if (outputtypesettings_OutputType == "facet_graph") {
     if(exists("facetsettings_NumRows")) facetsettings_NumRows <- facetsettings_NumRows else facetsettings_NumRows <- 1
     if (facetsettings_NumRows == 1) margin_facet <- 0.02 else margin_facet <- c(0.02, 0.02, 0.08, 0.08)  
   
-    fig <- subplot(spc_plots, shareX=TRUE, shareY=TRUE, nrows=facetsettings_NumRows, margin=margin_facet)
+    fig <- subplot(spc_plots, shareX=TRUE, 
+                   shareY = if(exists("facetsettings_FixedYAxisScale")) facetsettings_FixedYAxisScale else FALSE, 
+                   nrows=facetsettings_NumRows, margin=margin_facet)
 
 }
 
@@ -419,7 +418,7 @@ if (outputtypesettings_OutputType == "summarymatrix") {
                               "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target",
                               "Consistently Meeting Target")
   
-  summary_matrix <- ptd_summary_table %>% 
+  fig <- ptd_summary_table %>% 
     select(What, Variation, Assurance) %>%
     # Wonky temporary workaround to ensure every column exists without having to do lots of 'exists' checks
     union_all(one_of_each_variation %>% as_tibble() %>% rename(Variation = value)) %>% 
@@ -439,12 +438,7 @@ if (outputtypesettings_OutputType == "summarymatrix") {
                                        "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target",
                                        "Consistently Meeting Target"))) %>% 
     arrange(Assurance) %>%  
-    rename(` ` = `Assurance`) 
-  
-  
-  # Create any missing columns
-  
-  fig <- summary_matrix %>%
+    rename(` ` = `Assurance`) %>%
     DT::datatable(filter='none', 
                   escape=FALSE,
                   rownames = FALSE,
@@ -589,14 +583,7 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   } else { assurance_image <- "" }
   
   # Get settings from power bi visual formatting options
-  if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
-  
-  
-  
-  
-  
-
-  if (titlesettings_TitleOn == TRUE) {
+  if (exists("titlesettings_TitleOn") && titlesettings_TitleOn == TRUE) {
 
     what_column <- dataset %>% distinct(what) %>% pull()
     if(!is.na(what_column) & length(what_column) == 1) default_title <- what_column else default_title <- NA
@@ -768,7 +755,7 @@ if (outputtypesettings_OutputType == "graph") {
     )
 
 
-  if (titlesettings_TitleOn == TRUE) {
+  if (exists("titlesettings_TitleOn") && titlesettings_TitleOn == TRUE) {
   
 
   card_title <- list(text=title,
@@ -866,9 +853,10 @@ if (outputtypesettings_OutputType == "graph") {
 
   # Join as subplots
   
-  fig <- subplot(fig_icons, fig_plot, 
+  fig <- plotly::subplot(fig_icons, fig_plot, 
                  nrows = 2, 
-                 heights = c(0.6, 0.4))
+                 heights = c(0.6, 0.4)
+                 )
      
 }
 
