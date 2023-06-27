@@ -1,8 +1,5 @@
 #setwd("H:/nhs_ptd_power_bi")
 
-# Due to the way PowerBI visuals work, 
-
-
 # Import all required NHS R Plot the Dots scripts
 source('./r_files/flatten_HTML.r')
 source("./R/ptd_spc.R")
@@ -65,16 +62,12 @@ if(!is.null(annotations)) Values <- bind_cols(Values, annotations) else Values <
 if(!is.null(recalc_here)) Values <- bind_cols(Values, recalc_here) else Values <- Values %>% mutate(recalc_here = NA)
 if(!is.null(baseline_duration)) Values <- bind_cols(Values, baseline_duration) else Values <- Values %>% mutate(baseline_duration = NA)
 
-
 colnames(Values) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "baseline_duration") 
 
 dataset <- Values %>% 
     mutate(date = as.Date(date)) 
 
-
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
-
-if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
 
 if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "below"
 if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
@@ -98,23 +91,12 @@ if (outputtypesettings_OutputType == "summarytable" |
     
   single_what <- dataset %>% 
     filter(what == what_item) 
-    
-  # Extract option for baseline length (if included)
-  # Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
-  # We need the true null as then this means we will get the default behaviour of the ptd function
-  # if nothing is passed by the user
-  if(is.na(unique(single_what$baseline_duration))) baseline <- NULL else baseline <- unique(single_what$baseline_duration)
-  
-  # Extract rebase points (if included) - if none passed, return NULL so that we get default ptd behaviour 
-  if((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) rebase_points <- NULL else rebase_points <- (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase()
-  
+
   # Get any target values (if included)
   # If present, pass through to ptd target function
   if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
-
-  #if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
-
-  #if (is.na(target)) target <- spcsettings_Target
+  if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+  if(is.na(target)) target <- spcsettings_Target
   
   # Take improvement direction from where it is specified in original dataframe
   # TO BE DECIDED - is this best provided in the dataframe, or should this be an option in the PBI dataframe?
@@ -131,17 +113,15 @@ if (outputtypesettings_OutputType == "summarytable" |
   # If no improvement direction passed in the dataset, take the value from the dropdown instead
   # Note default in dropdown is "increase", in line with SPC defaults
   if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
-
   if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
-
   
   # Generate NHS R making data count object
   ptd_df <- ptd_spc(single_what, 
                         value_field = "value",
                         date_field="date", 
                         improvement_direction = improvement_direction,
-                        fix_after_n_points = baseline,
-                        rebase = rebase_points,
+                        fix_after_n_points = if(is.na(unique(single_what$baseline_duration))) NULL else unique(single_what$baseline_duration),
+                        rebase = if((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
                         target = target
   ) %>% 
     # We want the underlying dataframe rather than the resulting plot
@@ -197,9 +177,7 @@ if (outputtypesettings_OutputType == "summarytable" |
 
 if (outputtypesettings_OutputType == "facet_graph") {
 
-  if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- ""
-  
-  if (spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+  if (exists("spcsettings_ValueIsPercentage") & spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
   
   spc_plots <- list()
   
@@ -228,7 +206,7 @@ if (outputtypesettings_OutputType == "facet_graph") {
                       mode = 'markers', 
                       color = ~point_type, 
                       showlegend=showLegend,
-                      marker=list(size=pointsettings_PointSize)
+                      marker=list(size=if(exists("pointsettings_PointSize")) pointsettings_PointSize else 8)
           ) %>%
             # Add in line for lower process limit
             add_trace(y = ~lpl, 
@@ -494,21 +472,10 @@ if (outputtypesettings_OutputType == "summarymatrix") {
 
 if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == "card") {
 
-  # Extract option for baseline length
-  # Slightly odd layout required to get true null as return value - this pattern is reused throughout as seems very reliable
-  # We need the true null as then this means we will get the default behaviour of the ptd function
-  # if nothing is passed by the user
-  if(is.na(unique(dataset$baseline_duration))) baseline <- NULL else baseline <- unique(dataset$baseline_duration)
-  
-  # Extract rebase points (if included) - if none passed, return NULL so that we get default ptd behaviour 
-  if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) rebase_points <- NULL else rebase_points <- (dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase()
-  
   # Get any target values (if included)
   # If present, pass through to ptd target function
   if(is.na(unique(dataset$target))) target <- NULL else target <- unique(dataset$target) %>% ptd_target()
-  
   if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
-
   if (is.null(target) & !is.null(spcsettings_Target)) target <- spcsettings_Target
   
   # Take improvement direction from where it is specified in original dataframe
@@ -526,7 +493,6 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   # If no improvement direction passed in the dataset, take the value from the dropdown instead
   # Note default in dropdown is "increase", in line with SPC defaults
   if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
-
   if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
   
   # Generate NHS R making data count object
@@ -534,8 +500,8 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
           value_field = "value",
           date_field="date", 
           improvement_direction = improvement_direction,
-          fix_after_n_points = baseline,
-          rebase = rebase_points,
+          fix_after_n_points = if(is.na(unique(dataset$baseline_duration))) NULL else unique(dataset$baseline_duration),
+          rebase = if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
           target = target
           ) %>% 
     # We want the underlying dataframe rather than the resulting plot
@@ -569,7 +535,7 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
               mode = 'markers', 
               color = ~point_type, 
               showlegend=showLegend,
-              marker=list(size=pointsettings_PointSize)
+              marker=list(size=if(exists("pointsettings_PointSize")) pointsettings_PointSize else 8)
   ) %>%
     # Add in line for lower process limit
     add_trace(y = ~lpl, 
