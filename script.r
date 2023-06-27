@@ -284,9 +284,8 @@ if (outputtypesettings_OutputType == "facet_graph") {
           if (is.null(target)) assurance_image <- ""
           
           # Get settings from power bi visual formatting options
-          if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
-          if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
-                    if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
+          #if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
+          #if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
   
           # If using default title in a card visual, wrap it
           title <- ptd_object %>%
@@ -304,7 +303,7 @@ if (outputtypesettings_OutputType == "facet_graph") {
   
               annotations=list(
                       text=stringr::str_wrap(title, 25),
-                        font=list(size=titlesettings_TitleSize),
+                        font=list(size=if(exists("titlesettings_TitleSize")) titlesettings_TitleSize else 10),
                         x = 0.5,  
                         y = 1.0,  
                         xref = "paper",  
@@ -390,8 +389,7 @@ if (outputtypesettings_OutputType == "facet_graph") {
   
   
     if(exists("facetsettings_NumRows")) facetsettings_NumRows <- facetsettings_NumRows else facetsettings_NumRows <- 1
-  
-    if (facetsettings_NumRows == 1) margin_facet <- 0.02 else margin_facet <- c(0.02, 0.02, 0.1, 0.02)  
+    if (facetsettings_NumRows == 1) margin_facet <- 0.02 else margin_facet <- c(0.02, 0.02, 0.08, 0.08)  
   
     fig <- subplot(spc_plots, shareX=TRUE, shareY=TRUE, nrows=facetsettings_NumRows, margin=margin_facet)
 
@@ -591,13 +589,11 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   } else { assurance_image <- "" }
   
   # Get settings from power bi visual formatting options
-  if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
-  if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
   if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
   
-  if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
   
-  if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
+  
+  
   
 
   if (titlesettings_TitleOn == TRUE) {
@@ -630,17 +626,17 @@ if (outputtypesettings_OutputType == "graph") {
   fig <- fig %>%
     layout(
 
-    xaxis = list(title = xaxissettings_XAxisTitle),
-    yaxis = list(title = yaxissettings_YAxisTitle,
+    xaxis = list(title = if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle else ""),
+    yaxis = list(title = if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle else "",
                        tickformat = tickhoverformat),
 
 
       title=list(text=title,
-                 font=list(size=titlesettings_TitleSize),
+                 font=list(size=if(exists("titlesettings_TitleSize")) titlesettings_TitleSize else 10),
                  automargin=TRUE,
                  yref='container',
                  yanchor ='top',
-                 xred = if(titlesettings_TitleJustification == "central") "center" else "left"
+                 xred = if(exists("titlesettings_TitleJustification") && titlesettings_TitleJustification == "central") "center" else "left"
                  
                  ),
 
@@ -715,16 +711,7 @@ if (outputtypesettings_OutputType == "graph") {
   
 } else if (outputtypesettings_OutputType == "card") {
   
-  
-  if(exists("cardsettings_CardSuffix")) cardsettings_CardSuffix <- cardsettings_CardSuffix else cardsettings_CardSuffix <- ""
-  if(exists("cardsettings_CardPrefix")) cardsettings_CardPrefix <- cardsettings_CardPrefix else cardsettings_CardPrefix <- ""
-  
-  if(exists("cardsettings_ValueSize")) cardsettings_ValueSize <- cardsettings_ValueSize else cardsettings_ValueSize <- 48
-  
-  if(exists("cardsettings_CardTitleJustification")) cardsettings_CardTitleJustification <- cardsettings_CardTitleJustification else cardsettings_CardTitleJustification <- "central"
-  
   if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
-
 
   m <- list(
     
@@ -771,8 +758,6 @@ if (outputtypesettings_OutputType == "graph") {
   )
   
 
-
-  
   t <- list(
     
     family = "sans serif",
@@ -787,13 +772,13 @@ if (outputtypesettings_OutputType == "graph") {
   
 
   card_title <- list(text=title,
-               font=list(size=titlesettings_TitleSize*3),
+               font=list(size=if(exists("titlesettings_TitleSize")) titlesettings_TitleSize*3 else 10*3),
                #automargin=TRUE,
                yref='paper',
                yanchor = 'top',
                y=0.95,
-               xref=if(cardsettings_CardTitleJustification == "central") "center" else "left",
-               x=if(cardsettings_CardTitleJustification == "central") 0.5 else 0.05
+               xref=if(exists("cardsettings_CardTitleJustification") && cardsettings_CardTitleJustification == "central") "center" else "left",
+               x=if(exists("cardsettings_CardTitleJustification") && cardsettings_CardTitleJustification == "central") 0.5 else 0.05
                )
 
   } else {
@@ -801,7 +786,6 @@ if (outputtypesettings_OutputType == "graph") {
   card_title <- NULL
 
   }
-
 
   card_text <- dataset %>% 
         arrange(desc(date)) %>% 
@@ -854,9 +838,9 @@ if (outputtypesettings_OutputType == "graph") {
       
       text = card_text %>% 
         paste0(
-          cardsettings_CardPrefix,
+          if(exists("cardsettings_CardPrefix")) cardsettings_CardPrefix else "",
           .,
-          cardsettings_CardSuffix
+          if(exists("cardsettings_CardSuffix")) cardsettings_CardSuffix else cardsettings_CardSuffix <- ""
           ),
       
       xref = "paper",
@@ -871,7 +855,7 @@ if (outputtypesettings_OutputType == "graph") {
         
         color = "grey",
         
-        size = cardsettings_ValueSize
+        size = if(exists("cardsettings_ValueSize")) cardsettings_ValueSize else 48
         
       )
       
