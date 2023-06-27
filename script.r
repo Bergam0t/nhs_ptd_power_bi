@@ -1,5 +1,8 @@
 #setwd("H:/nhs_ptd_power_bi")
 
+# Due to the way PowerBI visuals work, 
+
+
 # Import all required NHS R Plot the Dots scripts
 source('./r_files/flatten_HTML.r')
 source("./R/ptd_spc.R")
@@ -70,13 +73,6 @@ dataset <- Values %>%
 
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
-
-
-# Set up palette using NHS identity colours for point types
-# TODO: add in support for neutral variation
-palette <- c("Special Cause - Concern" = "#ED8B00",
-              "Special Cause - Improvement" = "#41B6E6",
-              "Common Cause" = "#768692")
 
 if(exists("pointsettings_PointSize")) pointsettings_PointSize <- pointsettings_PointSize else pointsettings_PointSize <- 8
 
@@ -212,7 +208,9 @@ spc_plots <- list()
 
       fig <- plot_ly(ptd_object,
                       x = ~x,
-                      colors = palette)
+                      colors = c("Special Cause - Concern" = "#ED8B00",
+                                 "Special Cause - Improvement" = "#41B6E6",
+                                 "Common Cause" = "#768692"))
         
         fig <- fig %>%
           # Add the main line for the data
@@ -545,14 +543,7 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
           ) %>% 
     # We want the underlying dataframe rather than the resulting plot
     # so convert to tibble
-    as_tibble()
-  
-  
-  
-  #colnames() %>% stringr::str_replace("\\.","")
-  
-  
-  ptd_object <- ptd_object %>% 
+    as_tibble() %>% 
     # Tweak point type text for nicer display
     mutate(point_type = case_when(
       point_type == "special_cause_concern" ~ "Special Cause - Concern",
@@ -560,16 +551,13 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
       point_type == "common_cause" ~ "Common Cause",
       TRUE ~ "ERROR - CHECK"
     )) 
-    
-  # p <- ptd_object %>%
-  #      DT::datatable()
-  
+
   # Initialise the plotly figure
   fig <- plot_ly(ptd_object,
                  x = ~x,
-                 colors = palette)
-  
-  fig <- fig %>%
+                 colors = c("Special Cause - Concern" = "#ED8B00",
+                            "Special Cause - Improvement" = "#41B6E6",
+                            "Common Cause" = "#768692")) %>%
     # Add the main line for the data
     add_trace(y = ~y, 
               name = 'trace 0',
@@ -636,7 +624,6 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   if(variation_type == "Special Cause - Improvement" & improvement_direction == "increase") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_high.svg"
   if(variation_type == "Common Cause") variation_image <- "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/common_cause.svg"
   
-  
   # Get assurance image paths
   # NHS R PTD package provides a helper function for calculating this from the PTD object
   if (!is.null(target)) {
@@ -654,15 +641,14 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   # Get settings from power bi visual formatting options
   if(exists("titlesettings_TitleJustification")) titlesettings_TitleJustification <- titlesettings_TitleJustification else titlesettings_TitleJustification <- "center"
   if(exists("titlesettings_TitleSize")) titlesettings_TitleSize<- titlesettings_TitleSize else titlesettings_TitleSize <- 10
+  if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
   
   if(exists("xaxissettings_XAxisTitle")) xaxissettings_XAxisTitle <- xaxissettings_XAxisTitle else xaxissettings_XAxisTitle <- ""
   
   if(exists("yaxissettings_YAxisTitle")) yaxissettings_YAxisTitle <- yaxissettings_YAxisTitle else yaxissettings_YAxisTitle <- ""
   
   if(exists("iconsettings_IconSize")) iconsettings_IconSize <- iconsettings_IconSize else iconsettings_IconSize <- 0.1
-
-
-  if(exists("titlesettings_TitleOn")) titlesettings_TitleOn <- titlesettings_TitleOn else titlesettings_TitleOn <- TRUE
+  
 
   if (titlesettings_TitleOn == TRUE) {
 
@@ -687,13 +673,12 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
 
 if (outputtypesettings_OutputType == "graph") {
   
+  if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- ""
 
-if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- ""
+  if (spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
 
-if (spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
-
-# Update fig to include variation icon and, if present, assurance icon
-# Also pass in user parameters from the PBI visual formatting options for titles
+  # Update fig to include variation icon and, if present, assurance icon
+  # Also pass in user parameters from the PBI visual formatting options for titles
   fig <- fig %>%
     layout(
 
