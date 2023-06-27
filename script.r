@@ -108,6 +108,12 @@ if (outputtypesettings_OutputType == "summarytable" |
     if(exists("spcsettings_ImprovementDirection")) spcsettings_ImprovementDirection <- spcsettings_ImprovementDirection else spcsettings_ImprovementDirection <- "increase"
     if (is.na(improvement_direction)) improvement_direction <- spcsettings_ImprovementDirection
     
+    # Look at the dataset to determine whether something has been passed that tells us it's a percentage
+    # If not, look at the SPC settings
+    if(is.na(unique(single_what$is_percentage))) is_percentage <- NULL else is_percentage <- unique(single_what$is_percentage)
+    if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
+    if (is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
+    
     # Generate NHS R making data count object
     ptd_df <- ptd_spc(single_what, 
                           value_field = "value",
@@ -127,7 +133,8 @@ if (outputtypesettings_OutputType == "summarytable" |
         point_type == "common_cause" ~ "Common Cause",
         TRUE ~ "ERROR - CHECK"
       )) %>% 
-      mutate(title = what_item)
+      mutate(title = what_item) %>% 
+      mutate(is_percentage = is_percentage)
     
     # Store this for use in the faceted graph
     ptd_objects_tibble[[what_item]] <- ptd_df
@@ -169,13 +176,17 @@ if (outputtypesettings_OutputType == "summarytable" |
 
 if (outputtypesettings_OutputType == "facet_graph") {
 
-  if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+
+  
+  #if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
   
   spc_plots <- list()
   
     for (j in 1:length(ptd_objects_tibble)) {
   
         ptd_object <- ptd_objects_tibble[[j]]
+        
+        if ((ptd_object %>% distinct(is_percentage) %>% pull()) == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
   
         fig <- plot_ly(ptd_object,
                         x = ~x,
