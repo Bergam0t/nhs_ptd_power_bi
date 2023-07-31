@@ -61,7 +61,14 @@ colnames(dataset) <- c("value", "date", "what", "improvement_direction", "target
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
 if(exists("legendsettings_LegendPosition")) legendsettings_LegendPosition <- legendsettings_LegendPosition else legendsettings_LegendPosition <- "below"
-if (legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
+if(legendsettings_LegendPosition == "off" | outputtypesettings_OutputType == "card") showLegend <- FALSE else showLegend <- TRUE
+
+
+if(exists("manualrebasesettings_ManualRebasePoints")) manualrebasesettings_ManualRebasePoints <- (manualrebasesettings_ManualRebasePoints %>% strsplit(split=","))[[1]] else manualrebasesettings_ManualRebasePoints <- NULL
+
+
+if(!is.null(manualrebasesettings_ManualRebasePoints)) manualrebasesettings_ManualRebasePoints <- manualrebasesettings_ManualRebasePoints %>% as.Date(optional=TRUE, format = c("%Y-%m-%d"))
+if(all(is.na(manualrebasesettings_ManualRebasePoints))) manualrebasesettings_ManualRebasePoints <- NULL else manualrebasesettings_ManualRebasePoints <- na.omit(manualrebasesettings_ManualRebasePoints)
 
 dataset <- dataset %>% 
   mutate(date = as.Date(date)) 
@@ -121,7 +128,7 @@ if (outputtypesettings_OutputType == "summarytable" |
                           date_field="date", 
                           improvement_direction = improvement_direction,
                           fix_after_n_points = if(is.na(unique(single_what$baseline_duration))) NULL else unique(single_what$baseline_duration),
-                          rebase = if((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
+                          rebase = if(!is.null(manualrebasesettings_ManualRebasePoints)) manualrebasesettings_ManualRebasePoints %>% ptd_rebase() else if ((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
                           target = target
     ) %>% 
       # We want the underlying dataframe rather than the resulting plot
@@ -496,7 +503,7 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
           date_field="date", 
           improvement_direction = improvement_direction,
           fix_after_n_points = if(is.na(unique(dataset$baseline_duration))) NULL else unique(dataset$baseline_duration),
-          rebase = if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
+          rebase = if(!is.null(manualrebasesettings_ManualRebasePoints)) manualrebasesettings_ManualRebasePoints %>% ptd_rebase() else if((dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (dataset %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
           target = target
           ) %>% 
     # We want the underlying dataframe rather than the resulting plot

@@ -477,6 +477,21 @@
 },
 
 
+"manualrebasesettings": {
+  "displayName": "Manually Set Rebase Points",
+  "description": "Pass a string of comma separated dates in the format yyyy-mm-dd to rebase (recalculate process limits) at those dates",
+  "properties": {
+    "ManualRebasePoints": {
+      "displayName": "Rebase Points (e.g. 2013-01-31, 2015-04-30)",
+      "description": "Pass a string of comma separated dates in the format yyyy-mm-dd to rebase (recalculate process limits) at those dates",
+      "type": {
+        "text": true
+      }
+    }
+}
+},
+
+
     "rcv_script": {
       "properties": {
         "provider": {
