@@ -114,6 +114,7 @@ if (outputtypesettings_OutputType == "summarytable" |
     if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
     if (is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
     
+    
     # Generate NHS R making data count object
     ptd_df <- ptd_spc(single_what, 
                           value_field = "value",
@@ -186,7 +187,7 @@ if (outputtypesettings_OutputType == "facet_graph") {
   
         ptd_object <- ptd_objects_tibble[[j]]
         
-        if ((ptd_object %>% distinct(is_percentage) %>% pull()) == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+        if ((ptd_object %>% distinct(is_percentage) %>% pull()) == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ''
   
         fig <- plot_ly(ptd_object,
                         x = ~x,
@@ -617,9 +618,9 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   # If not, look at the SPC settings
   if(is.na(unique(dataset$is_percentage))) is_percentage <- NULL else is_percentage <- unique(dataset$is_percentage)
   if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
-  if (is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
+  if(is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
   
-  if (is_percentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+  if(is.null(is_percentage) | (!is.null(is_percentage) && is_percentage == FALSE)) tickhoverformat <- ',' else tickhoverformat <- ',.0%'
 
 }
 
@@ -716,7 +717,7 @@ if (outputtypesettings_OutputType == "graph") {
   
 } else if (outputtypesettings_OutputType == "card") {
   
-  if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
+  if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ''
 
   m <- list(
     
