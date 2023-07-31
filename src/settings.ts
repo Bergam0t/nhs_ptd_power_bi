@@ -58,6 +58,8 @@ export class VisualSettings extends DataViewObjectsParser {
 
       public facetsettings: FacetSettings = new FacetSettings();
 
+      public manualrebasesettings: ManualRebaseSettings = new ManualRebaseSettings();
+
     }
 
 
@@ -115,8 +117,17 @@ export class VisualSettings extends DataViewObjectsParser {
       public CardTitleJustification: string = "central";
       }
 
-      export class FacetSettings {
+    export class FacetSettings {
 
-        public NumRows: number = 1;
-  
-      }
+      public NumRows: number = 1;
+      public FixedYAxisScale: boolean = true;
+
+    }
+
+    export class ManualRebaseSettings {
+
+      public ManualRebasePoints: string = "";
+
+    }
+
+    

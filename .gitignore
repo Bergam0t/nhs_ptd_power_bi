@@ -12,3 +12,5 @@ NHSRplotthedots*.tgz
 .Renviron
 /.tmp/
 /node_modules/
+out.html
+out.html_files/
