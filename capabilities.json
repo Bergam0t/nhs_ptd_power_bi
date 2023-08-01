@@ -252,6 +252,14 @@
             "numeric": true
           }
         },
+
+        "Baseline": {
+          "displayName": "Manually Set Baseline (if baseline column not provided)",
+          "description": "If a baseline is not provided in the dataset, you can set it here. This will only work for a single graph or card, not a summary matrix or table.",
+          "type": {
+            "numeric": true
+          }
+        },
         
         "PadWithZeros": {
           "displayName": "(EXPERIMENTAL) Replace missing values with zeros?",

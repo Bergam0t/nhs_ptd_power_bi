@@ -174,6 +174,15 @@ if (outputtypesettings_OutputType == "summarytable" |
     if (is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
     
     
+    target <- single_what %>%
+      tail(1) %>%
+      select(target) %>%
+      pull()
+    
+    if (is.na(target)) target <- NULL
+    if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
+    if (is.null(target) & !is.null(spcsettings_Target)) target <- spcsettings_Target
+    
     # Generate NHS R making data count object
     ptd_df <- ptd_spc(single_what, 
                           value_field = "value",
@@ -181,7 +190,7 @@ if (outputtypesettings_OutputType == "summarytable" |
                           improvement_direction = improvement_direction,
                           fix_after_n_points = if(is.na(unique(single_what$baseline_duration))) NULL else unique(single_what$baseline_duration),
                           rebase = if(!is.null(manualrebasesettings_ManualRebasePoints)) manualrebasesettings_ManualRebasePoints %>% ptd_rebase() else if ((single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% nrow()) < 1) NULL else (single_what %>% filter(stringr::str_detect(recalc_here,"y|Y|yes|Yes|YES")) %>% select(date) %>% distinct() %>% pull()) %>% as.Date() %>% ptd_rebase(),
-                          target = target
+                          target = if(is.null(target)) target else (target %>% ptd_target()) 
     ) %>% 
       # We want the underlying dataframe rather than the resulting plot
       # so convert to tibble
@@ -295,14 +304,10 @@ if (outputtypesettings_OutputType == "facet_graph") {
                       showlegend=FALSE)
           
   
-         target <- ptd_object %>%
+          target <- ptd_object %>%
             tail(1) %>%
             select(target) %>%
             pull()
-  
-        if (is.na(target)) target <- NULL
-        if(exists("spcsettings_Target")) spcsettings_Target <- spcsettings_Target else spcsettings_Target <- NULL
-        if (is.null(target) & !is.null(spcsettings_Target)) target <- spcsettings_Target
   
           # If a target is provided, add in a line for the target
           if (!is.null(target)) {
