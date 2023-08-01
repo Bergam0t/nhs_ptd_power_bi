@@ -251,6 +251,14 @@
           "type": {
             "numeric": true
           }
+        },
+        
+        "PadWithZeros": {
+          "displayName": "(EXPERIMENTAL) Replace missing values with zeros?",
+          "description": "If true, will attempt to work out sequence frequency and pad with zeros.",
+          "type": {
+            "bool": true
+          }
         }
     }
     },

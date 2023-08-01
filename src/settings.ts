@@ -76,6 +76,7 @@ export class VisualSettings extends DataViewObjectsParser {
       public ImprovementDirection: string = "increase"
       public Target: number = null;
       public ValueIsPercentage: boolean = false;
+      public PadWithZeros: boolean = false;
       }
 
     export class ChartSettings {

@@ -21,6 +21,8 @@ source("./R/ptd_spc_standard.R")
 libraryRequireInstall("plotly")
 libraryRequireInstall("dplyr")
 libraryRequireInstall("DT")
+libraryRequireInstall("lubridate")
+libraryRequireInstall("tidyr")
 ####################################################
 
 ################### Actual code ####################
@@ -32,14 +34,39 @@ libraryRequireInstall("DT")
 # If testing, a sample dataset can be loaded from here (changing the path below the 
 # repository if necessary)
 # Double rebase
-# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_double_rebase_increase_good_trending_higher_inconsistent.csv") %>%
+# dataset <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_double_rebase_increase_good_trending_higher_inconsistent.csv") %>%
 #           mutate(date = lubridate::dmy(date))
 # More than one KPI
-# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_multiple_areas_double_rebase_increase.csv") %>%
+# dataset <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_multiple_areas_double_rebase_increase.csv") %>%
 #           mutate(date = lubridate::dmy(date))
 # Lots of KPIs
-# Values <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_10_areas.csv") %>%
+# dataset <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_10_areas.csv") %>%
 #           mutate(date = lubridate::dmy(date))
+
+rollbackward <- function(dates, roll_to_first = FALSE, preserve_hms = TRUE) {
+  .roll(dates, roll_to_first, preserve_hms)
+}
+
+.roll <- function(dates, roll_to_first, preserve_hms, forward = FALSE) {
+  if (length(dates) == 0) {
+    return(dates)
+  }
+  day(dates) <- 1
+  if (!preserve_hms) {
+    hour(dates) <- 0
+    minute(dates) <- 0
+    second(dates) <- 0
+  }
+  if (forward) {
+    dates <- dates + months(1)
+  }
+  if (roll_to_first) {
+    dates
+  } else {
+    dates - days(1)
+  }
+}
+
 
 # Import the mandatory columns
 if(exists("value")) value <- value else value <- NULL
@@ -72,6 +99,29 @@ if(all(is.na(manualrebasesettings_ManualRebasePoints))) manualrebasesettings_Man
 
 dataset <- dataset %>% 
   mutate(date = as.Date(date)) 
+
+if(exists("spcsettings_PadWithZeros")) spcsettings_PadWithZeros <- spcsettings_PadWithZeros else spcsettings_PadWithZeros <- FALSE
+
+if(spcsettings_PadWithZeros == TRUE) {
+  
+  dataset <- dataset %>%
+    mutate(Gap = difftime(lead(date), date, unit="days") %>% as.numeric()) 
+  
+  
+  if(dataset$Gap[1]>7 && day(min(dataset$date)) > 28 )  date_seq <- seq.Date(min(dataset$date)+1, max(dataset$date)+1, 
+                                                                             by="month") -1
+  else date_seq <- seq.Date(min(dataset$date), max(dataset$date), by=if(dataset$Gap[1]==1) "day" else if(dataset$Gap[1]==7) "week" else "hour")
+  
+  
+  dataset <- dataset %>% 
+    arrange(date) %>% 
+    tidyr::complete(date = date_seq) %>%
+    mutate(value = tidyr::replace_na(value, 0)) %>% 
+    tidyr::fill_(names(dataset)) %>%
+    select(-Gap) 
+    
+    
+}
 
 ##########################################################
 # Begin calculations for instances where we pass in 
