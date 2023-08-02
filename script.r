@@ -43,31 +43,6 @@ libraryRequireInstall("tidyr")
 # dataset <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_10_areas.csv") %>%
 #           mutate(date = lubridate::dmy(date))
 
-rollbackward <- function(dates, roll_to_first = FALSE, preserve_hms = TRUE) {
-  .roll(dates, roll_to_first, preserve_hms)
-}
-
-.roll <- function(dates, roll_to_first, preserve_hms, forward = FALSE) {
-  if (length(dates) == 0) {
-    return(dates)
-  }
-  day(dates) <- 1
-  if (!preserve_hms) {
-    hour(dates) <- 0
-    minute(dates) <- 0
-    second(dates) <- 0
-  }
-  if (forward) {
-    dates <- dates + months(1)
-  }
-  if (roll_to_first) {
-    dates
-  } else {
-    dates - days(1)
-  }
-}
-
-
 # Import the mandatory columns
 if(exists("value")) value <- value else value <- NULL
 if(exists("date")) date <- date else date <- NULL
@@ -106,7 +81,7 @@ if(spcsettings_PadWithZeros == TRUE) {
   
   dataset <- dataset %>%
     group_by(what) %>%
-    arrange(date) %>%
+    arrange(what, date) %>%
     mutate(Gap = difftime(lead(date), date, unit="days") %>% as.numeric()) %>% 
     mutate(ApproxInterval = case_when(
       mean(Gap, na.rm=TRUE) > 100 ~ "Years",
@@ -120,9 +95,9 @@ if(spcsettings_PadWithZeros == TRUE) {
   
   sub_datasets <- list()
   
-  for (what in dataset %>% distinct(what) %>% pull()) {
+  for (one_what in dataset %>% distinct(what) %>% pull()) {
   
-    sub_dataset <- dataset %>% filter(what == what)
+    sub_dataset <- dataset %>% filter(what == one_what)
     
     if (unique(sub_dataset$ApproxInterval) == "Years")  {date_seq <- seq.Date(min(sub_dataset$date), max(sub_dataset$date),  by="year")
     
@@ -140,7 +115,7 @@ if(spcsettings_PadWithZeros == TRUE) {
     
     }
     
-    sub_datasets[[what]] <- sub_dataset %>% 
+    sub_datasets[[one_what]] <- sub_dataset %>% 
       arrange(date) %>% 
       tidyr::complete(date = date_seq) %>%
       mutate(value = tidyr::replace_na(value, 0)) %>% 
@@ -151,7 +126,7 @@ if(spcsettings_PadWithZeros == TRUE) {
   
   }
   
-  dataset <- sub_datasets %>% bind_rows()
+  test <- sub_datasets %>% bind_rows() %>% arrange(what, date)
   
 }
 
