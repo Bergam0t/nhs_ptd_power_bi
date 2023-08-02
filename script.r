@@ -225,7 +225,7 @@ if (outputtypesettings_OutputType == "summarytable" |
       `Assurance` = assurance_type 
       
     ) %>%
-      mutate(is_percentage = if(is.null(is_percentage)) NA else is_percentage) %>% 
+      mutate(is_percentage = if(is.null(is_percentage)) FALSE else is_percentage) %>% 
       mutate(Assurance = case_when(
         
         Assurance == "consistent_pass" ~ "Consistently Meeting Target",
