@@ -126,7 +126,7 @@ if(spcsettings_PadWithZeros == TRUE) {
   
   }
   
-  test <- sub_datasets %>% bind_rows() %>% arrange(what, date)
+  dataset <- sub_datasets %>% bind_rows() %>% arrange(what, date)
   
 }
 
