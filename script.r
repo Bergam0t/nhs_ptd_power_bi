@@ -224,7 +224,8 @@ if (outputtypesettings_OutputType == "summarytable" |
       `Variation` = final_row %>% pull(point_type),
       `Assurance` = assurance_type 
       
-    ) %>% 
+    ) %>%
+      mutate(is_percentage = if(is.null(is_percentage)) NA else is_percentage) %>% 
       mutate(Assurance = case_when(
         
         Assurance == "consistent_pass" ~ "Consistently Meeting Target",
@@ -233,8 +234,7 @@ if (outputtypesettings_OutputType == "summarytable" |
         Assurance == "" ~ "No Target",
         TRUE ~ "ERROR - Check"
         
-      )) %>%
-      mutate(is_percentage = is_percentage)
+      )) 
   
   }
   
