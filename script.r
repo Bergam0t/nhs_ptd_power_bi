@@ -169,7 +169,7 @@ if (outputtypesettings_OutputType == "summarytable" |
     
     # Look at the dataset to determine whether something has been passed that tells us it's a percentage
     # If not, look at the SPC settings
-    if(is.na(unique(single_what$is_percentage))) is_percentage <- NULL else is_percentage <- unique(single_what$is_percentage)
+    if(is.null(unique(single_what$is_percentage) | is.na(unique(single_what$is_percentage)) )) is_percentage <- NULL else is_percentage <- unique(single_what$is_percentage)
     if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
     if (is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
     
