@@ -233,7 +233,8 @@ if (outputtypesettings_OutputType == "summarytable" |
         Assurance == "" ~ "No Target",
         TRUE ~ "ERROR - Check"
         
-      ))
+      )) %>%
+      mutate(is_percentage = is_percentage)
   
   }
   
