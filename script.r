@@ -203,7 +203,7 @@ if (outputtypesettings_OutputType == "summarytable" |
         TRUE ~ "ERROR - CHECK"
       )) %>% 
       mutate(title = what_item) %>% 
-      mutate(is_percentage = is_percentage)
+      mutate(is_percentage = if(is.null(is_percentage)) FALSE else is_percentage)
     
     # Store this for use in the faceted graph
     ptd_objects_tibble[[what_item]] <- ptd_df
