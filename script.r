@@ -105,19 +105,26 @@ if(exists("spcsettings_PadWithZeros")) spcsettings_PadWithZeros <- spcsettings_P
 if(spcsettings_PadWithZeros == TRUE) {
   
   dataset <- dataset %>%
-    mutate(Gap = difftime(lead(date), date, unit="days") %>% as.numeric()) 
+    mutate(Gap = difftime(lead(date), date, unit="days") %>% as.numeric()) %>% 
+    mutate(ApproxInterval = case_when(
+      mean(Gap, na.rm=TRUE) > 100 ~ "Years",
+      mean(Gap, na.rm=TRUE) > 10 && day(min(date, na.rm=TRUE)) > 28 ~ "Month Ends",
+      mean(Gap, na.rm=TRUE) > 10 && day(min(date, na.rm=TRUE)) == 1 ~ "Month Starts",
+      mean(Gap, na.rm=TRUE) > 2 ~ "Weeks",
+      TRUE ~ "Days"
+    )
+  )
   
-  
-  if (mean(dataset$Gap, na.rm=TRUE) > 45)  {date_seq <- seq.Date(min(dataset$date), max(dataset$date),  by="year")
+  if (unique(dataset$ApproxInterval) == "Years")  {date_seq <- seq.Date(min(dataset$date), max(dataset$date),  by="year")
   
   # If month ends
-  } else if(mean(dataset$Gap, na.rm=TRUE) > 10 && day(min(dataset$date)) > 28 ) { date_seq <- seq.Date(min(dataset$date)+1, max(dataset$date)+1, 
+  } else if(unique(dataset$ApproxInterval) == "Month Ends") { date_seq <- seq.Date(min(dataset$date)+1, max(dataset$date)+1, 
                                                                              by="month") -1 
   # If months starts
-  } else if (mean(dataset$Gap, na.rm=TRUE) > 10 && day(min(dataset$date)) ==1 )  { date_seq <- seq.Date(min(dataset$date), max(dataset$date)+1, 
+  } else if (unique(dataset$ApproxInterval) == "Month Starts")  { date_seq <- seq.Date(min(dataset$date), max(dataset$date)+1, 
                                                                                    by="month")
   # Weeks
-  } else if (mean(dataset$Gap, na.rm=TRUE) > 2 )  {date_seq <- seq.Date(min(dataset$date), max(dataset$date),  
+  } else if (unique(dataset$ApproxInterval) == "Weeks" )  {date_seq <- seq.Date(min(dataset$date), max(dataset$date),  
                                                                         by="week")
   # Days                                                                                                                                                       
   } else {date_seq <- seq.Date(min(dataset$date), max(dataset$date), by="day")
@@ -130,7 +137,6 @@ if(spcsettings_PadWithZeros == TRUE) {
     mutate(value = tidyr::replace_na(value, 0)) %>% 
     tidyr::fill_(names(dataset)) %>%
     select(-Gap) 
-    
     
 }
 
