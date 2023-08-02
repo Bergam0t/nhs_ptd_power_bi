@@ -105,6 +105,7 @@ if(exists("spcsettings_PadWithZeros")) spcsettings_PadWithZeros <- spcsettings_P
 if(spcsettings_PadWithZeros == TRUE) {
   
   dataset <- dataset %>%
+    arrange(date) %>%
     mutate(Gap = difftime(lead(date), date, unit="days") %>% as.numeric()) %>% 
     mutate(ApproxInterval = case_when(
       mean(Gap, na.rm=TRUE) > 100 ~ "Years",
