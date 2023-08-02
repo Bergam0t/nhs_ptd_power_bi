@@ -256,7 +256,7 @@ if (outputtypesettings_OutputType == "facet_graph") {
   
         ptd_object <- ptd_objects_tibble[[j]]
         
-        if ((ptd_object %>% distinct(is_percentage) %>% pull()) == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ''
+        if ((ptd_object %>% distinct(is_percentage) %>% head(1) %>% pull()) == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ''
   
         fig <- plot_ly(ptd_object,
                         x = ~x,
