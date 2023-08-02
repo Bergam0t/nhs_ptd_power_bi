@@ -112,7 +112,7 @@ if(spcsettings_PadWithZeros == TRUE) {
                                                                              by="month") -1
   else if (dataset$Gap[1]>7 && day(min(dataset$date)) ==1 )  date_seq <- seq.Date(min(dataset$date), max(dataset$date)+1, 
                                                                                    by="month")
-  else date_seq <- seq.Date(min(dataset$date), max(dataset$date), by=if(dataset$Gap[1]==1) "day" else if(dataset$Gap[1]==7) "week" else "hour")
+  else date_seq <- seq.Date(min(dataset$date), max(dataset$date), by=if(dataset$Gap[1]==1) "day" else if(dataset$Gap[1]==7) "week" else "year")
   
   
   dataset <- dataset %>% 
