@@ -108,11 +108,19 @@ if(spcsettings_PadWithZeros == TRUE) {
     mutate(Gap = difftime(lead(date), date, unit="days") %>% as.numeric()) 
   
   
-  if(dataset$Gap[1]>7 && day(min(dataset$date)) > 28 )  date_seq <- seq.Date(min(dataset$date)+1, max(dataset$date)+1, 
-                                                                             by="month") -1
-  else if (dataset$Gap[1]>7 && day(min(dataset$date)) ==1 )  date_seq <- seq.Date(min(dataset$date), max(dataset$date)+1, 
+  if (dataset$Gap[1] > 32)  {date_seq <- seq.Date(min(dataset$date), max(dataset$date),  by="year")
+  
+  } else if(dataset$Gap[1] > 7 && day(min(dataset$date)) > 28 ) { date_seq <- seq.Date(min(dataset$date)+1, max(dataset$date)+1, 
+                                                                             by="month") -1 
+  
+  } else if (dataset$Gap[1] > 7 && day(min(dataset$date)) ==1 )  { date_seq <- seq.Date(min(dataset$date), max(dataset$date)+1, 
                                                                                    by="month")
-  else date_seq <- seq.Date(min(dataset$date), max(dataset$date), by=if(dataset$Gap[1]==1) "day" else if(dataset$Gap[1]==7) "week" else "year")
+  
+  } else if (dataset$Gap[1] == 1 )  {date_seq <- seq.Date(min(dataset$date), max(dataset$date), 
+                                                                                   by="day")
+  } else {date_seq <- seq.Date(min(dataset$date), max(dataset$date), by="week")
+  
+  }
   
   
   dataset <- dataset %>% 
