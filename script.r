@@ -76,7 +76,7 @@ if(exists("manualrebasesettings_ManualRebasePoints")) manualrebasesettings_Manua
 
 
 if(!is.null(manualrebasesettings_ManualRebasePoints)) manualrebasesettings_ManualRebasePoints <- manualrebasesettings_ManualRebasePoints %>% as.Date(optional=TRUE, format = c("%Y-%m-%d"))
-if(all(is.na(manualrebasesettings_ManualRebasePoints))) manualrebasesettings_ManualRebasePoints <- NULL else manualrebasesettings_ManualRebasePoints <- na.omit(manualrebasesettings_ManualRebasePoints)
+if(!is.null(manualrebasesettings_ManualRebasePoints) && all(is.na(manualrebasesettings_ManualRebasePoints))) manualrebasesettings_ManualRebasePoints <- NULL else manualrebasesettings_ManualRebasePoints <- na.omit(manualrebasesettings_ManualRebasePoints)
 
 dataset <- dataset %>% 
   mutate(date = as.Date(date)) 
@@ -176,9 +176,12 @@ if (outputtypesettings_OutputType == "summarytable" |
     outputtypesettings_OutputType == "summarymatrix" | 
     outputtypesettings_OutputType == "facet_graph") {
   
+  if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
+  
   ptd_objects <- list()
   ptd_objects_tibble <- list()
 
+  
   for (what in 1:nrow(dataset %>% distinct(what))) { 
   
     what_item <- (dataset %>% distinct(what) %>% pull())[[what]]
@@ -212,9 +215,7 @@ if (outputtypesettings_OutputType == "summarytable" |
     # Look at the dataset to determine whether something has been passed that tells us it's a percentage
     # If not, look at the SPC settings
     if(is.null(unique(single_what$is_percentage) | is.na(unique(single_what$is_percentage)) )) is_percentage <- NULL else is_percentage <- unique(single_what$is_percentage)
-    if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
-    if (is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
-    
+    if((is.null(is_percentage) | is.na(is_percentage)) && !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
     
     target <- single_what %>%
       tail(1) %>%
@@ -245,7 +246,7 @@ if (outputtypesettings_OutputType == "summarytable" |
         TRUE ~ "ERROR - CHECK"
       )) %>% 
       mutate(title = what_item) %>% 
-      mutate(is_percentage = if(is.null(is_percentage)) FALSE else is_percentage)
+      mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)
     
     # Store this for use in the faceted graph
     ptd_objects_tibble[[what_item]] <- ptd_df
@@ -267,7 +268,7 @@ if (outputtypesettings_OutputType == "summarytable" |
       `Assurance` = assurance_type 
       
     ) %>%
-      mutate(is_percentage = if(is.null(is_percentage)) FALSE else is_percentage) %>% 
+      mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)%>% 
       mutate(Assurance = case_when(
         
         Assurance == "consistent_pass" ~ "Consistently Meeting Target",
@@ -296,10 +297,19 @@ if (outputtypesettings_OutputType == "facet_graph") {
   
     for (j in 1:length(ptd_objects_tibble)) {
   
-        ptd_object <- ptd_objects_tibble[[j]]
+        ptd_object <- ptd_objects_tibble[[j]] 
         
-        if (is.na(ptd_object %>% distinct(is_percentage) %>% head(1) %>% pull()) | (ptd_object %>% distinct(is_percentage) %>% head(1) %>% pull()) == FALSE)  tickhoverformat <- '' else tickhoverformat <- ',.0%'
+        #if (!is.na(ptd_object %>% distinct(is_percentage) %>% head(1) %>% pull()) && (ptd_object %>% distinct(is_percentage) %>% head(1) %>% pull()) != FALSE) tickhoverformat <- ',.0%' else tickhoverformat <- '' 
   
+        is_percentage_ptd_object <- ptd_object %>% distinct(is_percentage) %>% pull()
+        
+        if(is.null(is_percentage_ptd_object) | 
+           is.na(is_percentage_ptd_object) | 
+           (!is.null(is_percentage_ptd_object) && is_percentage_ptd_object==FALSE)
+           ) tickhoverformat <- ',' else tickhoverformat <- ',.0%'
+        
+           
+        
         fig <- plot_ly(ptd_object,
                         x = ~x,
                         colors = c("Special Cause - Concern" = "#ED8B00",
@@ -824,7 +834,7 @@ if (outputtypesettings_OutputType == "graph") {
   
 } else if (outputtypesettings_OutputType == "card") {
   
-  if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ''
+  if (exists("spcsettings_ValueIsPercentage") && (!is.null(is_percentage) && is_percentage == TRUE)) tickhoverformat <- ',.0%' else tickhoverformat <- ','
 
   m <- list(
     
