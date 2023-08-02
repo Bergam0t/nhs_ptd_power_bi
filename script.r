@@ -105,6 +105,7 @@ if(exists("spcsettings_PadWithZeros")) spcsettings_PadWithZeros <- spcsettings_P
 if(spcsettings_PadWithZeros == TRUE) {
   
   dataset <- dataset %>%
+    group_by(what) %>%
     arrange(date) %>%
     mutate(Gap = difftime(lead(date), date, unit="days") %>% as.numeric()) %>% 
     mutate(ApproxInterval = case_when(
@@ -114,31 +115,44 @@ if(spcsettings_PadWithZeros == TRUE) {
       mean(Gap, na.rm=TRUE) > 2 ~ "Weeks",
       TRUE ~ "Days"
     )
-  )
+  ) %>% 
+    ungroup()
   
-  if (unique(dataset$ApproxInterval) == "Years")  {date_seq <- seq.Date(min(dataset$date), max(dataset$date),  by="year")
+  sub_datasets <- list()
   
-  # If month ends
-  } else if(unique(dataset$ApproxInterval) == "Month Ends") { date_seq <- seq.Date(min(dataset$date)+1, max(dataset$date)+1, 
-                                                                             by="month") -1 
-  # If months starts
-  } else if (unique(dataset$ApproxInterval) == "Month Starts")  { date_seq <- seq.Date(min(dataset$date), max(dataset$date)+1, 
-                                                                                   by="month")
-  # Weeks
-  } else if (unique(dataset$ApproxInterval) == "Weeks" )  {date_seq <- seq.Date(min(dataset$date), max(dataset$date),  
-                                                                        by="week")
-  # Days                                                                                                                                                       
-  } else {date_seq <- seq.Date(min(dataset$date), max(dataset$date), by="day")
+  for (what in dataset %>% distinct(what) %>% pull()) {
+  
+    sub_dataset <- dataset %>% filter(what == what)
+    
+    if (unique(sub_dataset$ApproxInterval) == "Years")  {date_seq <- seq.Date(min(sub_dataset$date), max(sub_dataset$date),  by="year")
+    
+    # If month ends
+    } else if(unique(sub_dataset$ApproxInterval) == "Month Ends") { date_seq <- seq.Date(min(sub_dataset$date)+1, max(sub_dataset$date)+1, 
+                                                                               by="month") -1 
+    # If months starts
+    } else if (unique(sub_dataset$ApproxInterval) == "Month Starts")  { date_seq <- seq.Date(min(sub_dataset$date), max(sub_dataset$date)+1, 
+                                                                                     by="month")
+    # Weeks
+    } else if (unique(sub_dataset$ApproxInterval) == "Weeks" )  {date_seq <- seq.Date(min(sub_dataset$date), max(sub_dataset$date),  
+                                                                          by="week")
+    # Days                                                                                                                                                       
+    } else {date_seq <- seq.Date(min(sub_dataset$date), max(sub_dataset$date), by="day")
+    
+    }
+    
+    sub_datasets[[what]] <- sub_dataset %>% 
+      arrange(date) %>% 
+      tidyr::complete(date = date_seq) %>%
+      mutate(value = tidyr::replace_na(value, 0)) %>% 
+      tidyr::fill_(names(sub_dataset)) %>%
+      select(-Gap) 
+      
+  
   
   }
   
-  dataset <- dataset %>% 
-    arrange(date) %>% 
-    tidyr::complete(date = date_seq) %>%
-    mutate(value = tidyr::replace_na(value, 0)) %>% 
-    tidyr::fill_(names(dataset)) %>%
-    select(-Gap) 
-    
+  dataset <- sub_datasets %>% bind_rows()
+  
 }
 
 ##########################################################
