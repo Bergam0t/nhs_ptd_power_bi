@@ -62,6 +62,13 @@
       "description": "Optional for all visual types. Can be used to override default baseline duration.",
       "kind": "GroupingOrMeasure",
       "name": "baseline_duration"
+    },
+
+    {
+      "displayName": "Additional Dimension (OPTIONAL)",
+      "description": "Only used in summary table type 2 - optional.",
+      "kind": "GroupingOrMeasure",
+      "name": "additional_dimension"
     }
 
 
@@ -95,6 +102,9 @@
             "max": 1
           },
           "baseline_duration": {
+            "max": 1
+          },
+          "additional_dimension": {
             "max": 1
           }
         }
@@ -152,6 +162,11 @@
                   "for": {
                     "in": "baseline_duration"
                   }
+                },
+                {
+                  "for": {
+                    "in": "additional_dimension"
+                  }
                 }
               ],
               "dataReductionAlgorithm": {
@@ -201,6 +216,10 @@
               {
                 "displayName": "Summary Table",
                 "value": "summarytable"
+              },
+	      {
+                "displayName": "Summary Table - Version 2",
+                "value": "summarytable2"
               },
               {
                 "displayName": "Summary Matrix",

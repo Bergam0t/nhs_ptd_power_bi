@@ -1,4 +1,4 @@
-what,dimension2,improvement_direction,date,value,recalc_here,comment,baseline_duration,target,is_percentage
+what,additional_dimension,improvement_direction,date,value,recalc_here,comment,baseline_duration,target,is_percentage
 KPI-309 Number of Clients Seen in Month,North,increase,31/05/2021,14,,,,30,FALSE
 KPI-309 Number of Clients Seen in Month ,North,increase,30/06/2021,12,,,,30,FALSE
 KPI-309 Number of Clients Seen in Month,North,increase,31/07/2021,16,,,,30,FALSE

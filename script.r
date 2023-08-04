@@ -47,7 +47,13 @@ libraryRequireInstall("tidyr")
 #           mutate(date = lubridate::dmy(date)) %>%
 #   filter(date != '2022-03-31') %>%
 #   filter(date != '2023-01-01')
-
+# dataset <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_multiple_areas_double_rebase_increase.csv") %>%
+#           mutate(date = lubridate::dmy(date)) %>%
+#   filter(date != '2022-03-31') %>%
+#   filter(date != '2023-01-01')
+# Dataset with additional dimension
+# dataset <- read.csv("H:\\nhs_ptd_power_bi\\sample_datasets\\spc_xmr_sample_dataset_10_areas_kpis_with_second_dimension.csv") %>%
+#           mutate(date = lubridate::dmy(date))
 
 # Import the mandatory columns
 if(exists("value")) value <- value else value <- NULL
@@ -63,8 +69,9 @@ if(exists("annotations") && !is.null(annotations)) dataset <- bind_cols(dataset,
 if(exists("recalc_here") && !is.null(recalc_here)) dataset <- bind_cols(dataset, recalc_here) else dataset <- dataset %>% mutate(recalc_here = NA)
 if(exists("is_percentage") && !is.null(is_percentage)) dataset <- bind_cols(dataset, is_percentage) else dataset <- dataset %>% mutate(is_percentage = NA)
 if(exists("baseline_duration") && !is.null(baseline_duration)) dataset <- bind_cols(dataset, baseline_duration) else dataset <- dataset %>% mutate(baseline_duration = NA)
+if(exists("additional_dimension") && !is.null(additional_dimension)) dataset <- bind_cols(dataset, additional_dimension) else dataset <- dataset %>% mutate(additional_dimension = NA)
 
-colnames(dataset) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "is_percentage", "baseline_duration") 
+colnames(dataset) <- c("value", "date", "what", "improvement_direction", "target", "annotations", "recalc_here", "is_percentage", "baseline_duration", "additional_dimension") 
 
 if(exists("outputtypesettings_OutputType")) outputtypesettings_OutputType <- outputtypesettings_OutputType else outputtypesettings_OutputType <- "graph"
 
@@ -173,6 +180,7 @@ if(spcsettings_PadWithZeros == TRUE) {
 ##########################################################
 
 if (outputtypesettings_OutputType == "summarytable" | 
+    outputtypesettings_OutputType == "summarytable2" |
     outputtypesettings_OutputType == "summarymatrix" | 
     outputtypesettings_OutputType == "facet_graph") {
   
@@ -182,13 +190,17 @@ if (outputtypesettings_OutputType == "summarytable" |
   ptd_objects_tibble <- list()
 
   
-  for (what in 1:nrow(dataset %>% distinct(what))) { 
+  dataset <- dataset %>% 
+    mutate(combined_what = paste(what, additional_dimension)) 
   
-    what_item <- (dataset %>% distinct(what) %>% pull())[[what]]
-      
+  
+  for (combined_what in 1:nrow(dataset %>% distinct(combined_what))) { 
+  
+    what_item <- (dataset %>% distinct(combined_what) %>% pull())[[combined_what]]
+    
     single_what <- dataset %>% 
-      filter(what == what_item) 
-  
+      filter(combined_what == what_item) 
+    
     # Get any target values (if included)
     # If present, pass through to ptd target function
     if(is.na(unique(single_what$target))) target <- NULL else target <- unique(single_what$target) %>% ptd_target()
@@ -256,8 +268,9 @@ if (outputtypesettings_OutputType == "summarytable" |
     
     final_row <- ptd_df %>% arrange(x) %>% tail(1)
       
-    ptd_objects[[what]] <- tibble(
-      What = what_item,
+    ptd_objects[[combined_what]] <- tibble(
+      What = single_what %>% distinct(what) %>% pull() %>% as.character(),
+      `Additional Dimension` = single_what %>% distinct(additional_dimension) %>% pull() %>% as.character(),
       `Most Recent Data Point` =  final_row %>% pull(x),
       `Most Recent Value` =  final_row %>% pull(y),
       Mean = final_row %>% pull(mean),
@@ -265,8 +278,12 @@ if (outputtypesettings_OutputType == "summarytable" |
       `Upper Process Limit` = final_row %>% pull(upl),
       `Target` = final_row %>% pull(target),
       `Variation` = final_row %>% pull(point_type),
-      `Assurance` = assurance_type 
-      
+      `Assurance` = assurance_type,
+      `Improvement Direction` = case_when(improvement_direction == "decrease" ~ "Lower is good", 
+                                          improvement_direction == "increase" ~ "Higher is good", 
+                                          TRUE ~ "No direction is an improvement"),
+      `Combined What` = what_item
+        
     ) %>%
       mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)%>% 
       mutate(Assurance = case_when(
@@ -289,8 +306,6 @@ if (outputtypesettings_OutputType == "summarytable" |
 
 if (outputtypesettings_OutputType == "facet_graph") {
 
-
-  
   #if (exists("spcsettings_ValueIsPercentage") && spcsettings_ValueIsPercentage == TRUE) tickhoverformat <- ',.0%' else tickhoverformat <- ""
   
   spc_plots <- list()
@@ -525,7 +540,13 @@ if (outputtypesettings_OutputType == "facet_graph") {
 
 if (outputtypesettings_OutputType == "summarytable") {
   
+  if(all(is.na(ptd_summary_table %>% distinct(`Additional Dimension`) %>% pull()))) {
+    ptd_summary_table <- ptd_summary_table %>% 
+      select(-c(`Additional Dimension`) ) 
+  } 
+  
   fig <- ptd_summary_table %>% 
+    select(-`Combined What`) %>% 
     mutate_if(is.numeric, round, 1) %>%
     mutate(`Most Recent Data Point` = `Most Recent Data Point` %>% format("%d %b %Y")) %>% 
     mutate(Variation = as.factor(Variation),
@@ -538,6 +559,52 @@ if (outputtypesettings_OutputType == "summarytable") {
                   )
   
 }
+
+
+if (outputtypesettings_OutputType == "summarytable2") {
+  
+  ptd_summary_table %>% 
+    mutate(variation_image = case_when(
+      (Variation == "Special Cause - Concern" & `Improvement Direction` == "Lower is good") ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_high.svg",
+      (Variation == "Special Cause - Concern" & `Improvement Direction` == "Higher is good") ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_low.svg",
+      (Variation == "Special Cause - Improvement" & `Improvement Direction` == "Lower is good") ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_low.svg",
+      (Variation == "Special Cause - Improvement" & `Improvement Direction` == "Higher is good") ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/improvement_high.svg",  
+      Variation == "Common Cause" ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/common_cause.svg",
+      TRUE ~ "")
+  ) %>% 
+    mutate(assurance_image = case_when(
+      Assurance == "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target" ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/inconsistent.svg",
+      Assurance == "No Target" ~ "",
+      Assurance == "Consistently Meeting Target" ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/pass.svg",
+      Assurance == "Consistently Failing to Meet Target" ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/assurance/fail.svg",
+      TRUE ~ ""
+    )
+    ) %>% 
+    mutate(variation_image = paste0('<img src="', variation_image,'", alt="', Variation, '" style="width:50px;height:50px;">') ) %>% 
+    mutate(assurance_image = case_when(assurance_image == "" ~ "", TRUE ~ paste0('<img src="', assurance_image,'", alt="', Assurance, '" style="width:50px;height:50px;">'))) %>%
+  mutate(`Most Recent Value` = case_when(is_percentage == TRUE ~ paste0(round(as.numeric(`Most Recent Value`) * 100, 1), "%"), 
+                                         TRUE ~ as.character(`Most Recent Value`))
+         ) %>% 
+  mutate(output_string = paste0('Most Recent Value: ', `Most Recent Value`, 
+                                '<br/> ', variation_image, assurance_image
+                                )
+         ) %>%
+    select(What, `Additional Dimension`, output_string) %>% 
+    tidyr::spread(key=`Additional Dimension`, value=output_string) %>% 
+      DT::datatable(filter='none', 
+                    rownames = FALSE,
+                    autoHideNavigation = FALSE,
+                    escape = FALSE,
+                    fillContainer = TRUE,
+                    options = list(
+                      dom = 'Brt', scrollY = "200px"
+                    )
+                    #options=list(scrollY = "100px")
+      )
+  
+  
+}
+
 
 if (outputtypesettings_OutputType == "summarymatrix") {
   
