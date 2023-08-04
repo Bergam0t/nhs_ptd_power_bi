@@ -563,7 +563,7 @@ if (outputtypesettings_OutputType == "summarytable") {
 
 if (outputtypesettings_OutputType == "summarytable2") {
   
-  ptd_summary_table %>% 
+  fig <- ptd_summary_table %>% 
     mutate(variation_image = case_when(
       (Variation == "Special Cause - Concern" & `Improvement Direction` == "Lower is good") ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_high.svg",
       (Variation == "Special Cause - Concern" & `Improvement Direction` == "Higher is good") ~ "https://raw.githubusercontent.com/Bergam0t/nhs_ptd_power_bi/main/inst/icons/variation/concern_low.svg",
@@ -1066,7 +1066,7 @@ if (outputtypesettings_OutputType == "graph") {
 # ####################################################
 
 ############# Create and save widget ###############
-internalSaveWidget(if(outputtypesettings_OutputType != "summarytable" & outputtypesettings_OutputType != "summarymatrix") fig %>% plotly::partial_bundle(local=FALSE) else fig, 'out.html');
+internalSaveWidget(if(outputtypesettings_OutputType != "summarytable" & outputtypesettings_OutputType != "summarymatrix" & outputtypesettings_OutputType != "summarytable2") fig %>% plotly::partial_bundle(local=FALSE) else fig, 'out.html');
 ####################################################
 
 ################ Reduce paddings ###################
