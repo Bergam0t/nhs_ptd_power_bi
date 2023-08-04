@@ -16,6 +16,8 @@ source("./R/ptd_add_short_group_warnings.R")
 source("./R/ptd_add_target_column.R")
 source("./R/ptd_calculate_assurance_type.R")
 source("./R/ptd_spc_standard.R")
+source("./R/helpers.R")
+source("./R/sparkline.R")
 
 ############### Library Declarations ###############
 libraryRequireInstall("plotly")
@@ -260,6 +262,79 @@ if (outputtypesettings_OutputType == "summarytable" |
       mutate(title = what_item) %>% 
       mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)
     
+    
+    is_percentage_ptd_object <- ptd_df %>% distinct(is_percentage) %>% pull()
+    
+    if(is.null(is_percentage_ptd_object) | 
+       is.na(is_percentage_ptd_object) | 
+       (!is.null(is_percentage_ptd_object) && is_percentage_ptd_object==FALSE)
+    ) tickhoverformat <- ',' else tickhoverformat <- ',.0%'
+    
+    # sparkline <- plot_ly(ptd_df,
+    #                x = ~x,
+    #                colors = c("Special Cause - Concern" = "#ED8B00",
+    #                           "Special Cause - Improvement" = "#41B6E6",
+    #                           "Common Cause" = "#768692"),
+    #                height="100px")
+    # 
+    # sparkline <- sparkline %>%
+    #   # Add the main line for the data
+    #   add_trace(y = ~y, 
+    #             name = 'trace 0',
+    #             type="scatter",
+    #             mode = 'lines', 
+    #             line=list(color='#768692'),
+    #             showlegend=FALSE) %>%
+    #   # Add in markers for the data, colouring by the point types
+    #   # and using the palette we passed when initialising the sparklineure
+    #   add_trace(y = ~y,
+    #             type="scatter",
+    #             mode = 'markers', 
+    #             color = ~point_type, 
+    #             showlegend=FALSE,
+    #             marker=list(size=4)
+    #   ) %>%
+    #   # Add in line for lower process limit
+    #   add_trace(y = ~lpl, 
+    #             name = 'Lower Process Limit',
+    #             type="scatter",
+    #             mode = 'lines', 
+    #             line=list(color='#231f20', dash="dot"),
+    #             showlegend=FALSE) %>%
+    #   # Add in line for upper process limit
+    #   add_trace(y = ~upl, 
+    #             name = 'Upper Process Limit',
+    #             type="scatter",
+    #             mode = 'lines', 
+    #             line=list(color='#231f20', dash="dot"),
+    #             showlegend=FALSE) %>%
+    #   # Add in line for mean
+    #   # TODO: Investigate whether this should be median. Median doesn't appear in plot
+    #   # but I thought that was MDC methodology - I'm probably misremembering.
+    #   add_trace(y = ~mean, name = 'Mean',
+    #             type="scatter",
+    #             mode = 'lines', 
+    #             line=list(color='#231f20'),
+    #             showlegend=FALSE)
+    # 
+    # 
+    # target <- ptd_df %>%
+    #   tail(1) %>%
+    #   select(target) %>%
+    #   pull()
+    # 
+    # # If a target is provided, add in a line for the target
+    # if (!is.null(target)) {
+    #   sparkline <- sparkline %>%
+    #     add_trace(y = ~target, name = 'Target',
+    #               type="scatter",
+    #               mode = 'lines', 
+    #               line=list(color='#DA291C', dash="dot"),
+    #               showlegend=FALSE)
+    # }
+    # 
+    # ptd_df <- ptd_df %>% mutate(sparkline=list(htmltools::tagList(sparkline))) 
+    
     # Store this for use in the faceted graph
     ptd_objects_tibble[[what_item]] <- ptd_df
   
@@ -282,7 +357,8 @@ if (outputtypesettings_OutputType == "summarytable" |
       `Improvement Direction` = case_when(improvement_direction == "decrease" ~ "Lower is good", 
                                           improvement_direction == "increase" ~ "Higher is good", 
                                           TRUE ~ "No direction is an improvement"),
-      `Combined What` = what_item
+      `Combined What` = what_item#,
+      # sparkline=list(htmltools::tagList(sparkline))
         
     ) %>%
       mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)%>% 
@@ -546,7 +622,9 @@ if (outputtypesettings_OutputType == "summarytable") {
   } 
   
   fig <- ptd_summary_table %>% 
-    select(-`Combined What`) %>% 
+    select(-c(`Combined What`, `is_percentage`
+              #, sparkline
+              )) %>% 
     mutate_if(is.numeric, round, 1) %>%
     mutate(`Most Recent Data Point` = `Most Recent Data Point` %>% format("%d %b %Y")) %>% 
     mutate(Variation = as.factor(Variation),
@@ -585,8 +663,12 @@ if (outputtypesettings_OutputType == "summarytable2") {
   mutate(`Most Recent Value` = case_when(is_percentage == TRUE ~ paste0(round(as.numeric(`Most Recent Value`) * 100, 1), "%"), 
                                          TRUE ~ as.character(`Most Recent Value`))
          ) %>% 
+    
+  #mutate(sparkline = spk_chr(values = 1:3, elementId = paste0("spark", row_number()))) %>%
   mutate(output_string = paste0('Most Recent Value: ', `Most Recent Value`, 
-                                '<br/> ', variation_image, assurance_image
+                                '<br/> ', variation_image, assurance_image,
+                                ' '
+                                #, sparkline, ' '
                                 )
          ) %>%
     select(What, `Additional Dimension`, output_string) %>% 
@@ -597,11 +679,23 @@ if (outputtypesettings_OutputType == "summarytable2") {
                     escape = FALSE,
                     fillContainer = TRUE,
                     options = list(
-                      dom = 'Brt', scrollY = "200px"
-                    )
+                      dom = 'Brt', scrollY = "200px"#,
+                      # fnDrawCallback = htmlwidgets::JS('function(){
+                      #                                         HTMLWidgets.staticRender();
+                      #                                         }')
+                    ),
+                    class = 'cell-border'
                     #options=list(scrollY = "100px")
-      )
+      )  #%>%
+    #htmltools::attachDependencies(
+    #  htmlwidgets::getDependency('sparkline')
+    #)
+    
+  #fig %>% spk_add_deps() 
+
+  fig
   
+
   
 }
 
@@ -737,7 +831,8 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
               type="scatter",
               mode = 'lines', 
               line=list(color='#231f20'),
-              showlegend=FALSE)
+              showlegend=FALSE
+              )
   
   # If a target is provided, add in a line for the target
   if (!is.null(target)) {
@@ -800,7 +895,7 @@ if (outputtypesettings_OutputType == "graph" | outputtypesettings_OutputType == 
   
   # Look at the dataset to determine whether something has been passed that tells us it's a percentage
   # If not, look at the SPC settings
-  if(is.na(unique(dataset$is_percentage))) is_percentage <- NULL else is_percentage <- unique(dataset$is_percentage)
+  if(any( is.null(unique(dataset$is_percentage)) | is.na(unique(dataset$is_percentage)) )) is_percentage <- NULL else is_percentage <- unique(dataset$is_percentage)
   if(exists("spcsettings_ValueIsPercentage")) spcsettings_ValueIsPercentage <- spcsettings_ValueIsPercentage else spcsettings_ValueIsPercentage <- NULL
   if(is.null(is_percentage) & !is.null(spcsettings_ValueIsPercentage)) is_percentage <- spcsettings_ValueIsPercentage
   
