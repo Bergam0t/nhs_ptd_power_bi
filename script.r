@@ -16,8 +16,12 @@ source("./R/ptd_add_short_group_warnings.R")
 source("./R/ptd_add_target_column.R")
 source("./R/ptd_calculate_assurance_type.R")
 source("./R/ptd_spc_standard.R")
-source("./R/helpers.R")
-source("./R/sparkline.R")
+# source("./R/helpers.R")
+# source("./R/sparkline.R")
+# source("./R/reactable.R")
+# source("./R/columns.R")
+# source("./R/utils.R")
+# source("./R/onLOAD.R")
 
 ############### Library Declarations ###############
 libraryRequireInstall("plotly")
@@ -25,6 +29,7 @@ libraryRequireInstall("dplyr")
 libraryRequireInstall("DT")
 libraryRequireInstall("lubridate")
 libraryRequireInstall("tidyr")
+# libraryRequireInstall("xfun")
 ####################################################
 
 ################### Actual code ####################
@@ -270,6 +275,18 @@ if (outputtypesettings_OutputType == "summarytable" |
        (!is.null(is_percentage_ptd_object) && is_percentage_ptd_object==FALSE)
     ) tickhoverformat <- ',' else tickhoverformat <- ',.0%'
     
+    
+    temp_plot <- (ptd_df %>% 
+      ggplot(aes(x=x, y=y)) + 
+      geom_line() + 
+      geom_point(aes(color=point_type)) + 
+      theme_void() + 
+      scale_colour_manual(values=c("Special Cause - Concern" = "#ED8B00",
+                                                             "Special Cause - Improvement" = "#41B6E6",
+                                                             "Common Cause" = "#768692")) + 
+      theme(legend.position="none")) %>%
+      ggsave("sparkline.png", ., width=40, height=10, units="mm", device="png", dpi=120)
+    
     # sparkline <- plot_ly(ptd_df,
     #                x = ~x,
     #                colors = c("Special Cause - Concern" = "#ED8B00",
@@ -357,8 +374,9 @@ if (outputtypesettings_OutputType == "summarytable" |
       `Improvement Direction` = case_when(improvement_direction == "decrease" ~ "Lower is good", 
                                           improvement_direction == "increase" ~ "Higher is good", 
                                           TRUE ~ "No direction is an improvement"),
-      `Combined What` = what_item#,
+      `Combined What` = what_item,
       # sparkline=list(htmltools::tagList(sparkline))
+      sparkline=base64enc::dataURI(file = "sparkline.png", mime = "image/png")
         
     ) %>%
       mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)%>% 
@@ -667,23 +685,22 @@ if (outputtypesettings_OutputType == "summarytable2") {
   #mutate(sparkline = spk_chr(values = 1:3, elementId = paste0("spark", row_number()))) %>%
   mutate(output_string = paste0('Most Recent Value: ', `Most Recent Value`, 
                                 '<br/> ', variation_image, assurance_image,
-                                ' '
-                                #, sparkline, ' '
+                                '<br/> <img src="', sparkline, '" alt="Wow This Worked?"> '
                                 )
          ) %>%
     select(What, `Additional Dimension`, output_string) %>% 
     tidyr::spread(key=`Additional Dimension`, value=output_string) %>% 
-      DT::datatable(filter='none', 
-                    rownames = FALSE,
-                    autoHideNavigation = FALSE,
-                    escape = FALSE,
-                    fillContainer = TRUE,
-                    options = list(
-                      dom = 'Brt', scrollY = "200px"#,
+    DT::datatable(filter='none', 
+                  rownames = FALSE,
+                  autoHideNavigation = FALSE,
+                  escape = FALSE,
+                  fillContainer = TRUE,
+                  options = list(
+                  dom = 'Brt', scrollY = "200px"#,
                       # fnDrawCallback = htmlwidgets::JS('function(){
                       #                                         HTMLWidgets.staticRender();
                       #                                         }')
-                    ),
+                  ),
                     class = 'cell-border'
                     #options=list(scrollY = "100px")
       )  #%>%
