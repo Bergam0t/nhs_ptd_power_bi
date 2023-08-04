@@ -1,0 +1,161 @@
+what,dimension2,improvement_direction,date,value,recalc_here,comment,baseline_duration,target,is_percentage
+KPI-309 Number of Clients Seen in Month,North,increase,31/05/2021,14,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,North,increase,30/06/2021,12,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/07/2021,16,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/08/2021,17,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,30/09/2021,12,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/10/2021,27,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,30/11/2021,13,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/12/2021,14,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/01/2022,18,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,28/02/2022,25,y,Remodelled system,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/03/2022,32,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,30/04/2022,44,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/05/2022,37,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,30/06/2022,39,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/07/2022,41,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/08/2022,45,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,30/09/2022,42,y,New centre opened,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/10/2022,12,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,30/11/2022,31,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/12/2022,32,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/01/2023,39,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,28/02/2023,49,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/03/2023,51,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,30/04/2023,53,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month,North,increase,31/05/2023,58,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/05/2021,33,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/06/2021,46,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/07/2021,29,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/08/2021,45,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/09/2021,55,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/10/2021,24,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/11/2021,24,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/12/2021,47,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/01/2022,47,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,28/02/2022,53,y,Remodelled system,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/03/2022,17,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/04/2022,16,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/05/2022,14,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/06/2022,43,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/07/2022,41,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/08/2022,16,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/09/2022,44,y,New centre opened,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/10/2022,20,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/11/2022,30,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/12/2022,53,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/01/2023,51,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,28/02/2023,16,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/03/2023,38,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,30/04/2023,32,,,,30,FALSE
+KPI-309 Number of Clients Seen in Month ,South,increase,31/05/2023,56,,,,30,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/05/2021,14,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/06/2021,13,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/07/2021,17,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/08/2021,12,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/09/2021,12,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/10/2021,16,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/11/2021,15,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/12/2021,14,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/01/2022,17,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,28/02/2022,13,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/03/2022,15,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/04/2022,17,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/05/2022,16,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/06/2022,12,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/07/2022,14,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/08/2022,17,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/09/2022,13,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/10/2022,16,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/11/2022,13,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/12/2022,12,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/01/2023,16,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,28/02/2023,15,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/03/2023,13,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,30/04/2023,12,,,,,FALSE
+KPI-221 Number of Non-attenders,North,decrease,31/05/2023,15,,,,,FALSE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/05/2021,17,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/06/2021,14,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/07/2021,16,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/08/2021,16,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/09/2021,13,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/10/2021,17,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/11/2021,12,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/12/2021,12,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/01/2022,17,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,28/02/2022,13,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/03/2022,17,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/04/2022,17,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/05/2022,15,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/06/2022,16,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/07/2022,15,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/08/2022,12,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/09/2022,12,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/10/2022,16,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/11/2022,13,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/12/2022,12,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/01/2023,12,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,28/02/2023,12,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/03/2023,16,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,30/04/2023,17,,,,0.9,TRUE
+KPI-221 Percentage of health checks completed - SMI,North,increase,31/05/2023,14,,,,0.9,TRUE
+KPI-587 Number of New Patients,South,decrease,31/12/2021,34,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/01/2022,44,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,28/02/2022,39,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/03/2022,46,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,30/04/2022,45,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/05/2022,47,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,30/06/2022,57,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/07/2022,32,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/08/2022,39,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,30/09/2022,56,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/10/2022,57,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,30/11/2022,41,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/12/2022,48,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/01/2023,40,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,28/02/2023,33,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/03/2023,32,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,30/04/2023,56,,,,,FALSE
+KPI-587 Number of New Patients,South,decrease,31/05/2023,31,,,,,FALSE
+KPI-481 Staff Turnover %,North,decrease,31/01/2022,0.09,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,28/02/2022,0.06,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/03/2022,0.16,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,30/04/2022,0.12,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/05/2022,0.16,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,30/06/2022,0.16,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/07/2022,0.05,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/08/2022,0.13,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,30/09/2022,0.05,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/10/2022,0.09,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,30/11/2022,0.13,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/12/2022,0.08,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/01/2023,0.09,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,28/02/2023,0.14,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/03/2023,0.16,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,30/04/2023,0.17,,,,0.075,TRUE
+KPI-481 Staff Turnover %,North,decrease,31/05/2023,0.06,,,,0.075,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/05/2021,0.67,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/06/2021,0.27,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/07/2021,0.39,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/08/2021,0.62,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/09/2021,0.91,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/10/2021,0.21,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/11/2021,0.69,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/12/2021,0.21,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/01/2022,0.7,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,28/02/2022,0.4,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/03/2022,0.76,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/04/2022,0.96,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/05/2022,0.84,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/06/2022,0.32,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/07/2022,0.21,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/08/2022,0.82,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/09/2022,0.92,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/10/2022,0.05,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/11/2022,0.15,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/12/2022,0.75,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/01/2023,0.42,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,28/02/2023,0.4,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/03/2023,0.4,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,30/04/2023,0.65,,,,,TRUE
+KPI-481 Staff Turnover %,South,decrease,31/05/2023,0.45,,,,,TRUE
