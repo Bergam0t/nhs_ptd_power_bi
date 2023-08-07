@@ -275,7 +275,7 @@ if (outputtypesettings_OutputType == "summarytable" |
        (!is.null(is_percentage_ptd_object) && is_percentage_ptd_object==FALSE)
     ) tickhoverformat <- ',' else tickhoverformat <- ',.0%'
     
-    
+    if(outputtypesettings_OutputType == "summarytable2") {
     temp_plot <- (ptd_df %>% 
       ggplot(aes(x=x, y=y)) + 
       geom_line() + 
@@ -284,8 +284,19 @@ if (outputtypesettings_OutputType == "summarytable" |
       scale_colour_manual(values=c("Special Cause - Concern" = "#ED8B00",
                                                              "Special Cause - Improvement" = "#41B6E6",
                                                              "Common Cause" = "#768692")) + 
-      theme(legend.position="none")) %>%
-      ggsave("sparkline.png.tmp", ., width=40, height=8, units="mm", device="png", dpi=120)
+      theme(legend.position="none", plot.margin = margin(0.1,0.1,0.1,0.1, "mm")) +
+      geom_hline(aes(yintercept=target), linetype="dotted", color="red") + 
+      geom_text(aes(x=quantile(x, 0.1), label=min(x) %>% format("%d %b\n%y"), y=min(ptd_df$y, na.rm=TRUE)+abs(y*0.1)), data=ptd_df %>% arrange(x) %>% head(1), size=1.5) + 
+      geom_text(aes(x=quantile(x, 0.9), label=max(x) %>% format("%d %b\n%y"), y=min(ptd_df$y, na.rm=TRUE)+abs(y*0.1)),  data=ptd_df %>% arrange(x) %>% tail(1), size=1.5) + 
+      geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), data=ptd_df %>% arrange(y) %>% head(1), size=2)  + 
+      geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), data=ptd_df %>% arrange(y) %>% tail(1), size=2)  +
+      ylim(min(ptd_df$y, na.rm=TRUE)-abs(min(ptd_df$y, na.rm=TRUE)*0.2), max(ptd_df$y, na.rm=TRUE)+abs(max(ptd_df$y, na.rm=TRUE)*0.2))
+      #geom_hline(aes(yintercept=upl), linetype="dotted")  + 
+      #geom_hline(aes(yintercept=lpl), linetype="dotted")  
+        
+        ) %>%
+      ggsave("sparkline.png.tmp", ., width=40, height=10, units="mm", device="png", dpi=120)
+    }
     
     # Store this for use in the faceted graph
     ptd_objects_tibble[[what_item]] <- ptd_df
@@ -311,7 +322,7 @@ if (outputtypesettings_OutputType == "summarytable" |
                                           TRUE ~ "No direction is an improvement"),
       `Combined What` = what_item,
       # sparkline=list(htmltools::tagList(sparkline))
-      sparkline=base64enc::dataURI(file = "sparkline.png.tmp", mime = "image/png")
+      sparkline=if(outputtypesettings_OutputType == "summarytable2") base64enc::dataURI(file = "sparkline.png.tmp", mime = "image/png") else NA
         
     ) %>%
       mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)%>% 
