@@ -285,72 +285,7 @@ if (outputtypesettings_OutputType == "summarytable" |
                                                              "Special Cause - Improvement" = "#41B6E6",
                                                              "Common Cause" = "#768692")) + 
       theme(legend.position="none")) %>%
-      ggsave("sparkline.png", ., width=40, height=10, units="mm", device="png", dpi=120)
-    
-    # sparkline <- plot_ly(ptd_df,
-    #                x = ~x,
-    #                colors = c("Special Cause - Concern" = "#ED8B00",
-    #                           "Special Cause - Improvement" = "#41B6E6",
-    #                           "Common Cause" = "#768692"),
-    #                height="100px")
-    # 
-    # sparkline <- sparkline %>%
-    #   # Add the main line for the data
-    #   add_trace(y = ~y, 
-    #             name = 'trace 0',
-    #             type="scatter",
-    #             mode = 'lines', 
-    #             line=list(color='#768692'),
-    #             showlegend=FALSE) %>%
-    #   # Add in markers for the data, colouring by the point types
-    #   # and using the palette we passed when initialising the sparklineure
-    #   add_trace(y = ~y,
-    #             type="scatter",
-    #             mode = 'markers', 
-    #             color = ~point_type, 
-    #             showlegend=FALSE,
-    #             marker=list(size=4)
-    #   ) %>%
-    #   # Add in line for lower process limit
-    #   add_trace(y = ~lpl, 
-    #             name = 'Lower Process Limit',
-    #             type="scatter",
-    #             mode = 'lines', 
-    #             line=list(color='#231f20', dash="dot"),
-    #             showlegend=FALSE) %>%
-    #   # Add in line for upper process limit
-    #   add_trace(y = ~upl, 
-    #             name = 'Upper Process Limit',
-    #             type="scatter",
-    #             mode = 'lines', 
-    #             line=list(color='#231f20', dash="dot"),
-    #             showlegend=FALSE) %>%
-    #   # Add in line for mean
-    #   # TODO: Investigate whether this should be median. Median doesn't appear in plot
-    #   # but I thought that was MDC methodology - I'm probably misremembering.
-    #   add_trace(y = ~mean, name = 'Mean',
-    #             type="scatter",
-    #             mode = 'lines', 
-    #             line=list(color='#231f20'),
-    #             showlegend=FALSE)
-    # 
-    # 
-    # target <- ptd_df %>%
-    #   tail(1) %>%
-    #   select(target) %>%
-    #   pull()
-    # 
-    # # If a target is provided, add in a line for the target
-    # if (!is.null(target)) {
-    #   sparkline <- sparkline %>%
-    #     add_trace(y = ~target, name = 'Target',
-    #               type="scatter",
-    #               mode = 'lines', 
-    #               line=list(color='#DA291C', dash="dot"),
-    #               showlegend=FALSE)
-    # }
-    # 
-    # ptd_df <- ptd_df %>% mutate(sparkline=list(htmltools::tagList(sparkline))) 
+      ggsave("sparkline.png.tmp", ., width=40, height=8, units="mm", device="png", dpi=120)
     
     # Store this for use in the faceted graph
     ptd_objects_tibble[[what_item]] <- ptd_df
@@ -376,7 +311,7 @@ if (outputtypesettings_OutputType == "summarytable" |
                                           TRUE ~ "No direction is an improvement"),
       `Combined What` = what_item,
       # sparkline=list(htmltools::tagList(sparkline))
-      sparkline=base64enc::dataURI(file = "sparkline.png", mime = "image/png")
+      sparkline=base64enc::dataURI(file = "sparkline.png.tmp", mime = "image/png")
         
     ) %>%
       mutate(is_percentage = if(!is.null(is_percentage) | !is.na(is_percentage)) is_percentage else NA)%>% 
@@ -710,7 +645,7 @@ if (outputtypesettings_OutputType == "summarytable2") {
     
   #fig %>% spk_add_deps() 
 
-  fig
+  #fig
   
 
   
