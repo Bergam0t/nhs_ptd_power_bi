@@ -313,7 +313,7 @@ if (outputtypesettings_OutputType == "summarytable" |
       #geom_hline(aes(yintercept=lpl), linetype="dotted")  
         
         ) %>%
-      ggsave("sparkline.png.tmp", ., width=30, height=8, units="mm", device="png", dpi=200)
+      ggsave("sparkline.png.tmp", ., width=25, height=8, units="mm", device="png", dpi=200)
     }
     
     # Store this for use in the faceted graph
@@ -651,7 +651,7 @@ if (outputtypesettings_OutputType == "summarytable2") {
          ) %>% 
     mutate(`Assurance Variation Combination` = case_when(
       
-      Variation == "Special Cause - Concern" | Assurance == "<b style='color:#8A1538;'>Consistently Failing to Meet Target" ~ "Key Area of Concern</b><br/>",
+      Variation == "Special Cause - Concern" | Assurance == "Consistently Failing to Meet Target" ~ "<b style='color:#8A1538;'>Area of Concern</b><br/>",
       Assurance == "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target" ~ "<b style='color:#ED8B00;'>Not Consistently Meeting Target</b><br/>",
       Variation == "Special Cause - Improvement" ~ "<b style='color:#009639;'>Area to Celebrate</b><br/>",
       TRUE ~ ""
