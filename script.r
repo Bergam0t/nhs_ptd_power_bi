@@ -277,25 +277,43 @@ if (outputtypesettings_OutputType == "summarytable" |
     
     if(outputtypesettings_OutputType == "summarytable2") {
     temp_plot <- (ptd_df %>% 
-      ggplot(aes(x=x, y=y)) + 
-      geom_line() + 
-      geom_point(aes(color=point_type)) + 
+      ggplot(aes(x=x)) + 
+      geom_line(aes(y=y)) + 
+      geom_point(aes(y=y, color=point_type)) + 
       theme_void() + 
       scale_colour_manual(values=c("Special Cause - Concern" = "#ED8B00",
                                                              "Special Cause - Improvement" = "#41B6E6",
                                                              "Common Cause" = "#768692")) + 
-      theme(legend.position="none", plot.margin = margin(0.1,0.1,0.1,0.1, "mm")) +
+      theme(legend.position="none", plot.margin = margin(0.1,0.1,0.1,0.1, "mm")#, 
+            
+            ) + # Rectangle size around label) +
       geom_hline(aes(yintercept=target), linetype="dotted", color="red") + 
-      geom_text(aes(x=quantile(x, 0.1), label=min(x) %>% format("%d %b\n%y"), y=min(ptd_df$y, na.rm=TRUE)+abs(y*0.1)), data=ptd_df %>% arrange(x) %>% head(1), size=1.5) + 
-      geom_text(aes(x=quantile(x, 0.9), label=max(x) %>% format("%d %b\n%y"), y=min(ptd_df$y, na.rm=TRUE)+abs(y*0.1)),  data=ptd_df %>% arrange(x) %>% tail(1), size=1.5) + 
-      geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), data=ptd_df %>% arrange(y) %>% head(1), size=2)  + 
-      geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), data=ptd_df %>% arrange(y) %>% tail(1), size=2)  +
-      ylim(min(ptd_df$y, na.rm=TRUE)-abs(min(ptd_df$y, na.rm=TRUE)*0.2), max(ptd_df$y, na.rm=TRUE)+abs(max(ptd_df$y, na.rm=TRUE)*0.2))
+        geom_line(aes(x=x, y=lpl), linetype="dotted", color="grey") + 
+        geom_line(aes(x=x, y=upl), linetype="dotted", color="grey") + 
+      #geom_text(aes(x=quantile(x, 0.1), label=min(x) %>% format("%d %b\n%y"), y=min(ptd_df$y, na.rm=TRUE)+abs(y*0.1)), data=ptd_df %>% arrange(x) %>% head(1), size=1.5) + 
+      #geom_text(aes(x=quantile(x, 0.9), label=max(x) %>% format("%d %b\n%y"), y=min(ptd_df$y, na.rm=TRUE)+abs(y*0.1)),  data=ptd_df %>% arrange(x) %>% tail(1), size=1.5) + 
+        # Add label showing lowest value 
+        geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), 
+                      data=ptd_df %>% arrange(y) %>% head(1), 
+                      size=1.5, 
+                      label.padding = unit(0.1, "lines"), 
+                      nudge_y=abs(ptd_df %>% arrange(y) %>% head(1) %>% pull()) * 0.1
+                 )  + 
+      # Add label showing highest value
+      geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), 
+                 data=ptd_df %>% arrange(y) %>% tail(1), 
+                 size=1.5, 
+                 label.padding = unit(0.1, "lines"), 
+                 nudge_y=abs(ptd_df %>% arrange(y) %>% tail(1) %>% pull()) * -0.1
+                 )  +
+      ylim(min(min(ptd_df$y, na.rm=TRUE), min(ptd_df$lpl, na.rm=TRUE)) -abs(min(ptd_df$y, na.rm=TRUE)*0.2), 
+           
+           max(max(ptd_df$y, na.rm=TRUE), max(ptd_df$upl, na.rm=TRUE))+abs(max(ptd_df$y, na.rm=TRUE)*0.2))
       #geom_hline(aes(yintercept=upl), linetype="dotted")  + 
       #geom_hline(aes(yintercept=lpl), linetype="dotted")  
         
         ) %>%
-      ggsave("sparkline.png.tmp", ., width=40, height=10, units="mm", device="png", dpi=120)
+      ggsave("sparkline.png.tmp", ., width=30, height=8, units="mm", device="png", dpi=200)
     }
     
     # Store this for use in the faceted graph
@@ -312,6 +330,10 @@ if (outputtypesettings_OutputType == "summarytable" |
       `Most Recent Data Point` =  final_row %>% pull(x),
       `Most Recent Value` =  final_row %>% pull(y),
       Mean = final_row %>% pull(mean),
+      Max = max(ptd_df$y, na.rm=TRUE),
+      Min = min(ptd_df$y, na.rm=TRUE),
+      EarliestDate = min(ptd_df$x, na.rm=TRUE),
+      LatestDate = max(ptd_df$x, na.rm=TRUE),
       `Lower Process Limit` = final_row %>% pull(lpl),
       `Upper Process Limit` = final_row %>% pull(upl),
       `Target` = final_row %>% pull(target),
@@ -622,16 +644,25 @@ if (outputtypesettings_OutputType == "summarytable2") {
       TRUE ~ ""
     )
     ) %>% 
-    mutate(variation_image = paste0('<img src="', variation_image,'", alt="', Variation, '" style="width:50px;height:50px;">') ) %>% 
-    mutate(assurance_image = case_when(assurance_image == "" ~ "", TRUE ~ paste0('<img src="', assurance_image,'", alt="', Assurance, '" style="width:50px;height:50px;">'))) %>%
+    mutate(variation_image = paste0('<img src="', variation_image,'", alt="', Variation, '" style="width:30px;height:30px;">') ) %>% 
+    mutate(assurance_image = case_when(assurance_image == "" ~ "", TRUE ~ paste0('<img src="', assurance_image,'", alt="', Assurance, '" style="width:30px;height:30px;">'))) %>%
   mutate(`Most Recent Value` = case_when(is_percentage == TRUE ~ paste0(round(as.numeric(`Most Recent Value`) * 100, 1), "%"), 
                                          TRUE ~ as.character(`Most Recent Value`))
          ) %>% 
+    mutate(`Assurance Variation Combination` = case_when(
+      
+      Variation == "Special Cause - Concern" | Assurance == "<b style='color:#8A1538;'>Consistently Failing to Meet Target" ~ "Key Area of Concern</b><br/>",
+      Assurance == "Inconsistent - Sometimes Meeting Target, Sometimes Failing to Meet Target" ~ "<b style='color:#ED8B00;'>Not Consistently Meeting Target</b><br/>",
+      Variation == "Special Cause - Improvement" ~ "<b style='color:#009639;'>Area to Celebrate</b><br/>",
+      TRUE ~ ""
+      
+    )) %>%
     
   #mutate(sparkline = spk_chr(values = 1:3, elementId = paste0("spark", row_number()))) %>%
-  mutate(output_string = paste0('Most Recent Value: ', `Most Recent Value`, 
-                                '<br/> ', variation_image, assurance_image,
-                                '<br/> <img src="', sparkline, '" alt="Wow This Worked?"> '
+  mutate(output_string = paste0(`Assurance Variation Combination`, '<small>Most Recent Value:</small> <big>', `Most Recent Value`, 
+                                '</big><br/> ', variation_image, assurance_image,
+                                '<br/> <img src="', sparkline, '" alt="Sparkline"> <br/>',
+                                '<small>', EarliestDate %>% format("%d %b %y"), ' to ', LatestDate %>% format("%d %b %y"), "</small>"
                                 )
          ) %>%
     select(What, `Additional Dimension`, output_string) %>% 
