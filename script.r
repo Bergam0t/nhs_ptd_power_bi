@@ -296,6 +296,7 @@ if (outputtypesettings_OutputType == "summarytable" |
         geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), 
                       data=ptd_df %>% arrange(y) %>% head(1), 
                       size=1.5, 
+                      alpha=0.8,
                       label.padding = unit(0.1, "lines"), 
                       nudge_y=abs(ptd_df %>% arrange(y) %>% head(1) %>% pull()) * 0.1
                  )  + 
@@ -303,6 +304,7 @@ if (outputtypesettings_OutputType == "summarytable" |
       geom_label(aes(x=x, y=y, label=if(is_percentage) paste0(round(y * 100, 1), "%") else y), 
                  data=ptd_df %>% arrange(y) %>% tail(1), 
                  size=1.5, 
+                 alpha=0.8,
                  label.padding = unit(0.1, "lines"), 
                  nudge_y=abs(ptd_df %>% arrange(y) %>% tail(1) %>% pull()) * -0.1
                  )  +
@@ -667,7 +669,8 @@ if (outputtypesettings_OutputType == "summarytable2") {
          ) %>%
     select(What, `Additional Dimension`, output_string) %>% 
     tidyr::spread(key=`Additional Dimension`, value=output_string) %>% 
-    DT::datatable(filter='none', 
+    mutate(What = stringr::str_wrap(What, 12) %>% stringr::str_replace_all("\\n", "<br/>")) %>% 
+      DT::datatable(filter='none', 
                   rownames = FALSE,
                   
                   autoHideNavigation = FALSE,
@@ -675,8 +678,9 @@ if (outputtypesettings_OutputType == "summarytable2") {
                   fillContainer = TRUE,
                   options = list(
                     ordering=F,
-                    autoWidth = TRUE,
-                  dom = 'Brt', scrollY = "200px"#,
+                    # autoWidth = TRUE,
+                    # columnDefs = list(list(width = '10%', targets = c(1))),
+                    dom = 'Brt', scrollY = "200px"#,
                       # fnDrawCallback = htmlwidgets::JS('function(){
                       #                                         HTMLWidgets.staticRender();
                       #                                         }')
