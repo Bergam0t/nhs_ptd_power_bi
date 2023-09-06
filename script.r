@@ -669,10 +669,13 @@ if (outputtypesettings_OutputType == "summarytable2") {
     tidyr::spread(key=`Additional Dimension`, value=output_string) %>% 
     DT::datatable(filter='none', 
                   rownames = FALSE,
+                  
                   autoHideNavigation = FALSE,
                   escape = FALSE,
                   fillContainer = TRUE,
                   options = list(
+                    ordering=F,
+                    autoWidth = TRUE,
                   dom = 'Brt', scrollY = "200px"#,
                       # fnDrawCallback = htmlwidgets::JS('function(){
                       #                                         HTMLWidgets.staticRender();
