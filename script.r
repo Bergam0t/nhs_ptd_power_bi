@@ -676,6 +676,7 @@ if (outputtypesettings_OutputType == "summarytable2") {
                   autoHideNavigation = FALSE,
                   escape = FALSE,
                   fillContainer = TRUE,
+                  width="1800px",
                   options = list(
                     ordering=F,
                     autoWidth = FALSE,
