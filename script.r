@@ -681,7 +681,7 @@ if (outputtypesettings_OutputType == "summarytable2") {
                     # autoWidth = TRUE,
                     # columnDefs = list(list(width = '10%', targets = c(1))),
                     dom = 'Brt', 
-                    scrollX = FALSE,
+                    scrollX = "2500px",
                     scrollY = "200px"#,
                       # fnDrawCallback = htmlwidgets::JS('function(){
                       #                                         HTMLWidgets.staticRender();
