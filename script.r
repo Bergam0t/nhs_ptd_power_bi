@@ -279,7 +279,7 @@ if (outputtypesettings_OutputType == "summarytable" |
     temp_plot <- (ptd_df %>% 
       ggplot(aes(x=x)) + 
       geom_line(aes(y=y)) + 
-      geom_point(aes(y=y, color=point_type)) + 
+      geom_point(aes(y=y, color=point_type), size=0.6) + 
       theme_void() + 
       scale_colour_manual(values=c("Special Cause - Concern" = "#ED8B00",
                                                              "Special Cause - Improvement" = "#41B6E6",
