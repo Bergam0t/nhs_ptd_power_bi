@@ -1,0 +1,382 @@
+---
+title: "High Intensity Users - Dummy Dataset"
+author: "DPT Informatics"
+date: "13/09/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+library(dplyr)
+library(wakefield)
+library(openxlsx)
+library(stringr)
+library(lubridate)
+
+
+```
+
+
+
+SELECT ClientID, COUNT(*) AS [Number of Referrals in Last 6 Months],
+sum(COUNT(*)) over(order by COUNT(*) DESC rows unbounded preceding) as runningtotal
+FROM *table*
+WHERE Date >= DATEADD(month, -6, GETDATE())
+GROUP BY ClientID
+ORDER BY COUNT(*) DESC
+
+
+```{r}
+# ClientID
+# [Number of Referrals in Last 6 Months]
+# runningtotal
+
+attendances_per_client_df <- wakefield::r_data_frame(n = 472,
+  ClientID = wakefield::id(),
+  `Number of Referrals in Last 6 Months` = rlnorm(meanlog=2, sdlog=1.2)
+  ) %>% 
+  mutate(`Number of Referrals in Last 6 Months` = ceiling(`Number of Referrals in Last 6 Months`)) %>% 
+  arrange(desc(`Number of Referrals in Last 6 Months`)) %>% 
+  mutate(runningtotal = cumsum(`Number of Referrals in Last 6 Months`)) %>% 
+  mutate(ClientID = glue::glue("1000{ClientID}"))
+
+attendances_per_client_df %>%
+  write.xlsx(file="attendances_per_client_dummy_data.xlsx")
+
+```
+
+
+```{r}
+high_intensity_users <- attendances_per_client_df %>% 
+  slice_head(n=30) %>%
+  select(-runningtotal) %>% 
+  rename(`FRS Calls in Last 12 Months` = `Number of Referrals in Last 6 Months`)
+
+high_intensity_users %>% 
+  write.xlsx("high_intensity_users_dummy_data.xlsx")
+
+client_ids <- high_intensity_users %>% select(ClientID) %>% pull()
+```
+
+# Begin by creating dataset for type of interest (in this case FRS) thaat will match the specified number of calls
+
+```{r}
+list_frs_dfs <- list()
+
+for (client in (1:length(client_ids))) {
+ 
+  client_row <- high_intensity_users[client,]
+  
+  this_client_id <- client_row %>% select(ClientID) %>% pull() %>% as.character()
+  
+  n <- client_row %>% select(`FRS Calls in Last 12 Months`) %>% pull()
+  
+  list_frs_dfs[[client]] <-   wakefield::r_data_frame(
+    n = n,
+    ClientID = this_client_id,
+    Type = "Crisis Line Call",
+    Label = "Crisis Line Call",
+    Date = wakefield::dob(start=Sys.Date() - 365 * 7, k = 365 * 7),
+    Time = wakefield::time_stamp(random=TRUE, x=seq(0, 23, by = 0.1)),
+    Triage = wakefield::r_sample_factor(c("A - Emergency", "B - 4 Hour Response", "C - 24 Hour Response", "D - 48 Hour Response", "E - Requires Specialist Mental Health Assessment but Stable", "F - Not requiring face to face response, specify ongoing support", "G - Advice or information only"), 
+                                        prob=c(0.02, 0.04, 0.05, 0.07, 0.15, 0.25, 0.42))
+  ) 
+  
+}
+
+frs <- bind_rows(list_frs_dfs) %>% 
+  mutate(EndDate = NULL) %>% 
+  mutate(`Additional Tooltip` = glue::glue("Initial Triage Rating: {Triage} </br> Call Time: {substr(Time, 1, 5)}")) %>%
+  select(-c(Time, Triage))
+```
+### Create list of place of safety attendances
+
+```{r}
+list_pos_dfs <- list()
+
+for (client in (1:length(client_ids))) {
+ 
+  client_row <- high_intensity_users[client,]
+  
+  this_client_id <- client_row %>% select(ClientID) %>% pull() %>% as.character()
+  
+  n <- (rnorm(n=1, mean=7, sd=20) %>% round(0) %>% abs()) + 1
+  
+  list_pos_dfs[[client]] <-   wakefield::r_data_frame(
+    n = n,
+    ClientID = this_client_id,
+    Type = "Place of Safety (POS)",
+    Label = "Place of Safety (POS)",
+    Date = wakefield::dob(start=Sys.Date() - 365 * 7, k = 365 * 7),
+    Time = wakefield::time_stamp(random=TRUE, x=seq(0, 23, by = 0.1)),
+    Transport = wakefield::r_sample_factor(c("Ambulance", "Police", "Other", "Not Recorded"), 
+                                        prob=c(0.1, 0.6, 0.2, 0.1))
+  ) 
+  
+}
+
+pos <- bind_rows(list_pos_dfs) %>% 
+  mutate(EndDate = NULL) %>% 
+  mutate(`Additional Tooltip` = glue::glue("Arrival Method: {Transport} </br> Arrival Time: {substr(Time, 1, 5)}")) %>%
+  select(-c(Time, Transport)) 
+```
+
+
+### Create list of liaison psychiatry attendances
+
+```{r}
+list_liaison_dfs <- list()
+
+for (client in (1:length(client_ids))) {
+ 
+  client_row <- high_intensity_users[client,]
+  
+  this_client_id <- client_row %>% select(ClientID) %>% pull() %>% as.character()
+  
+  n <- (rnorm(n=1, mean=7, sd=20) %>% round(0) %>% abs()) + 1
+  
+  list_liaison_dfs[[client]] <-   wakefield::r_data_frame(
+    n = n,
+    ClientID = this_client_id,
+    Type = "Liaison Psychiatry",
+    Label = "Liaison Psychiatry",
+    Date = wakefield::dob(start=Sys.Date() - 365 * 7, k = 365 * 7),
+    Time = wakefield::time_stamp(random=TRUE, x=seq(0, 23, by = 0.1)),
+    Location = wakefield::r_sample_factor(c("AMU", "ED", "DGH", "Other"), 
+                                        prob=c(0.1, 0.8, 0.1, 0.1))
+  ) 
+  
+}
+
+liaison <- bind_rows(list_liaison_dfs) %>% 
+  mutate(EndDate = NULL) %>% 
+  mutate(`Response Time Target` = case_when(Location == "ED" | Location == "AMU" ~ "1 hour", TRUE ~ "24 hours")) %>% 
+  rowwise() %>% 
+  mutate(`Response Time` = case_when(`Response Time Target` == "1 hour" ~ rnorm(1, 80, 13), TRUE ~ (rnorm(1, 1440, 140))/24)) %>% 
+  ungroup() %>% 
+  mutate(`Response Time` = `Response Time` %>% round(0)) %>% 
+  mutate(`Response Time` = case_when(`Response Time Target` == "1 hour" ~ paste(`Response Time`, "minutes"), TRUE ~ paste(`Response Time`, "hours"))) %>% 
+  mutate(`Additional Tooltip` = glue::glue("Client Location: {Location} </br>Arrival Time: {substr(Time, 1, 5)}</br>Response Time: {`Response Time`} (target: {`Response Time Target`})")) %>%
+  select(-c(Time, Location, `Response Time Target`, `Response Time`))
+```
+
+
+### Next create a list of referrals for these clients
+
+```{r}
+list_referral_dfs <- list()
+
+for (client in (1:length(client_ids))) {
+ 
+  client_row <- high_intensity_users[client,]
+  
+  this_client_id <- client_row %>% select(ClientID) %>% pull() %>% as.character()
+  
+  n <- (rnorm(n=1, mean=9, sd=5) %>% round(0) %>% abs()) + 1
+  
+  list_referral_dfs[[client]] <-   wakefield::r_data_frame(
+    n = n,
+    ClientID = this_client_id,
+    Type = "Referral",
+    Label = wakefield::r_sample_factor(c("Core Adult Mental Health Team", 
+                                         "Crisis Home Treatment Team", 
+                                         "Psychology", 
+                                         "Support Into Employment", 
+                                         "Personality Disorders", 
+                                         "Adult ADHD", 
+                                         "Adult Autistic Spectrum Service", 
+                                         "Mental Health Assessment Team", 
+                                         "STEP Team"),
+                                       prob=c(0.5, 0.2, 0.1, 0.05, 0.05, 0.05, 0.02, 0.02, 0.01 )),
+    Date = wakefield::dob(start=Sys.Date() - 365 * 7, k = 365 * 7),
+    ReferralLengthDays = wakefield::normal(365, 365), 
+    Reason = wakefield::r_sample_factor(c("Anxiety", "Depression", "Personality Disorders"), prob=c(0.45, 0.45, 0.1))
+  ) 
+  
+}
+
+referrals <- bind_rows(list_referral_dfs) %>% 
+  rowwise() %>% 
+  mutate(ReferralLengthDays = case_when(Label == "Crisis Home Treatment Team" ~ rnorm(1, 12, 3), TRUE ~ ReferralLengthDays )) %>% 
+  ungroup() %>%
+  # Order each client's referrals to a particular team by the order in which they tool place
+  group_by(ClientID, Label) %>%
+  arrange(ClientID, Label, Date) %>% 
+  mutate(RowNumber = row_number()) %>% 
+  mutate(EndDate = Date + abs(ReferralLengthDays)) %>% 
+  mutate(Date = case_when(RowNumber > 1 ~ as.Date(NA), TRUE ~ Date),
+         EndDate = case_when(RowNumber > 1 ~ as.Date(NA), TRUE ~ EndDate)) %>% 
+  
+  mutate(Date = case_when(RowNumber == 2 ~ lag(EndDate, 1) + abs(rnorm(1, 365, 120)), TRUE ~ Date) ) %>% 
+  mutate(EndDate = Date + abs(ReferralLengthDays)) %>%
+  
+  mutate(Date = case_when(RowNumber == 3 ~ lag(EndDate, 1) + abs(rnorm(1, 365, 120)), TRUE ~ Date) ) %>% 
+  mutate(EndDate = Date + abs(ReferralLengthDays)) %>%
+  
+  mutate(Date = case_when(RowNumber == 4 ~ lag(EndDate, 1) + abs(rnorm(1, 365, 120)), TRUE ~ Date) ) %>% 
+  mutate(EndDate = Date + abs(ReferralLengthDays)) %>% 
+  
+  ungroup() %>% 
+  filter(RowNumber <= 4) %>%
+  filter(Date <= Sys.Date()) %>%
+  mutate(EndDate = case_when(EndDate > Sys.Date() ~ as.Date(NA), TRUE ~ EndDate)) %>%
+  mutate(Reason = case_when(Label == "Crisis Home Treatment Team" ~ "Mental Health Crisis",
+                            Label == "STEP Team" ~ "First Episode Psychosis",
+                            Label == "Adult ADHD" & RowNumber == 1 ~ "ADHD Diagnosis",
+                            Label == "Adult ADHD" & RowNumber > 1 ~ "ADHD Support",
+                            Label == "Adult Autistic Spectrum Service" & RowNumber == 1 ~ "ASC Diagnosis",
+                            Label == "Adult Autistic Spectrum Service" & RowNumber > 1 ~ "ASC Support",
+                            TRUE ~ as.character(Reason))
+         ) %>%
+  mutate(`Additional Tooltip` = glue::glue("Reason: {Reason}")) %>%
+  select(-c(Reason, RowNumber))
+
+```
+
+
+
+
+### Create individual contacts that took place
+
+```{r}
+contacts_df_lists <- list()
+
+for (row in 1:nrow(referrals)) {
+  
+  client_row <- referrals[row,]
+  
+  this_client_id <- client_row %>% select(ClientID) %>% pull() %>% as.character()
+  
+  n_contacts <- (rnorm(n=1, mean=12, sd=15) %>% round(0) %>% abs())
+  
+  if (n_contacts > 1) {
+
+  contacts_df_lists[[row]] <-   wakefield::r_data_frame(
+    n = n_contacts,
+    ClientID = this_client_id,
+    Type = "Contact",
+    Label = client_row %>% select(Label) %>% pull() %>% as.character(),
+    Date = wakefield::dob(start =  client_row %>% select(Date) %>% pull(), 
+                          k = client_row %>% select(ReferralLengthDays) %>% pull() %>% abs()),
+    ReferralLengthDays = wakefield::normal(365, 365), 
+    ContactMedium = wakefield::r_sample_factor(c("Face to Face", 
+                                         "Telephone", 
+                                         "Video Call", 
+                                         "Text Message", 
+                                         "Online Chat", 
+                                         "Other"),
+                                       prob=c(0.5, 0.2, 0.15, 0.05, 0.05, 0.05)),
+    Attended = wakefield::r_sample_factor(c("Attended on Time",
+                                            "Attended Late but Seen",
+                                            "Attended Late - Not Possible to See",
+                                            "Did not Attend"),
+                                       prob=c(0.7, 0.1, 0.1, 0.1))
+  )
+      
+  }
+}
+
+contacts <- bind_rows(contacts_df_lists) %>%
+  mutate(`Additional Tooltip` = glue::glue("Contact Medium: {ContactMedium} </br>{Attended}")) %>% 
+  select(-c(Attended, ContactMedium, ReferralLengthDays) )
+```
+
+```{r}
+referrals <- referrals %>% 
+  select(-ReferralLengthDays)
+```
+
+### Create ward stays
+
+```{r}
+list_inpatient_dfs <- list()
+
+for (client in (1:length(client_ids))) {
+ 
+  client_row <- high_intensity_users[client,]
+  
+  this_client_id <- client_row %>% select(ClientID) %>% pull() %>% as.character()
+  
+  n <- (rnorm(n=1, mean=2, sd=1) %>% round(0) %>% abs()) + 1
+  
+  list_inpatient_dfs[[client]] <-   wakefield::r_data_frame(
+    n = n,
+    ClientID = this_client_id,
+    Type = "Inpatient",
+    Label = wakefield::r_sample_factor(c("Zinc Ward", 
+                                         "Copper Ward", 
+                                         "Titanium House", 
+                                         "Magnesium Heights", 
+                                         "Tin Ward", 
+                                         "Steel House", 
+                                         "Strontium View", 
+                                         "Cobalt Ward", 
+                                         "Beryllium Crisis House")#,
+                                       #prob=c(0.5, 0.2, 0.1, 0.05, 0.05, 0.05, 0.02, 0.02, 0.01 )
+                                       )
+    ,
+    Date = wakefield::dob(start=Sys.Date() - 365 * 7, k = 365 * 7),
+    StayLengthDays = wakefield::normal(30, 120)#, 
+    #Reason = wakefield::r_sample_factor(c("Anxiety", "Depression", "Personality Disorders"), prob=c(0.45, 0.45, 0.1))
+  ) 
+  
+}
+
+inpatient_stays <- bind_rows(list_inpatient_dfs) %>% 
+  rowwise() %>% 
+  mutate(StayLengthDays = case_when(Label == "Beryllium Crisis House" ~ rnorm(1, 12, 3), TRUE ~ StayLengthDays )) %>% 
+  ungroup() %>%
+  # Order each client's referrals to a particular team by the order in which they tool place
+  group_by(ClientID) %>%
+  arrange(ClientID, Date) %>% 
+  mutate(RowNumber = row_number()) %>% 
+  mutate(EndDate = Date + abs(StayLengthDays)) %>% 
+  mutate(Date = case_when(RowNumber > 1 ~ as.Date(NA), TRUE ~ Date),
+         EndDate = case_when(RowNumber > 1 ~ as.Date(NA), TRUE ~ EndDate)) %>% 
+  
+  mutate(Date = case_when(RowNumber == 2 ~ lag(EndDate, 1) + abs(rnorm(1, 30, 120)), TRUE ~ Date) ) %>% 
+  mutate(EndDate = Date + abs(StayLengthDays)) %>%
+  
+  mutate(Date = case_when(RowNumber == 3 ~ lag(EndDate, 1) + abs(rnorm(1, 30, 120)), TRUE ~ Date) ) %>% 
+  mutate(EndDate = Date + abs(StayLengthDays)) %>%
+  
+  mutate(Date = case_when(RowNumber == 4 ~ lag(EndDate, 1) + abs(rnorm(1, 30, 120)), TRUE ~ Date) ) %>% 
+  mutate(EndDate = Date + abs(StayLengthDays)) %>% 
+  
+  ungroup() %>% 
+  filter(RowNumber <= 4) %>%
+  filter(Date <= Sys.Date()) %>%
+  mutate(EndDate = case_when(EndDate > Sys.Date() ~ as.Date(NA), TRUE ~ EndDate)) %>%
+  mutate(`Additional Tooltip` = "") %>%
+  select(-c(RowNumber, StayLengthDays))
+
+```
+
+```{r}
+inpatient_stays %>% 
+  rename(AdmissionDate = Date,
+         DischargeDate = EndDate,
+         Specialty = Type,
+         Ward = Label) %>%
+  write.xlsx("inpatient_dummy_data.xlsx")
+```
+
+
+### Write to file
+
+
+```{r}
+referrals %>% 
+  union_all(contacts) %>% 
+  union_all(frs) %>% 
+  union_all(pos) %>% 
+  union_all(liaison) %>% 
+  union_all(inpatient_stays) %>% 
+  write.xlsx("community_simplified_dummy_data.xlsx")
+```
+
+```{r}
+print("done")
+```
+
+
