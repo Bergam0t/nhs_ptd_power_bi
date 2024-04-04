@@ -40,6 +40,8 @@ option ‘more visuals’ –&gt; ‘From my files’.
 
 ![](man/figures/README-example-powerbi-import-custom-visual.png)
 
+The visual will work when publishing to the PowerBI service.
+
 At present, the following fields are available to populate.
 
 | Field Name                | What is this?                                                               | Notes                                                                                                                                                                                                                 | Example value                           |
@@ -109,6 +111,12 @@ Table’ to get a table like the one below.
 
 ![](man/figures/README-example-kpi-summary.png)
 
+A second type of summary table is also available.
+
+![](https://github.com/Bergam0t/nhs_ptd_power_bi/assets/29951987/9502379e-0943-4778-8548-9e10061aecd9)
+
+*Note that tables may display smaller than the space allowed for them when editing in PowerBI desktop. Better use of the space will be made when the report is published to the PowerBI service.*
+
 ## Faceted Graph
 
 If passing multiple KPIs, from the ‘Output Options’ select ‘Faceted
@@ -116,6 +124,34 @@ Graph’ to get a graph like the one below. The number of rows can be
 edited.
 
 ![](man/figures/README-example-faceted_graph.png)
+
+# Limitations
+
+Due to the nature of R-powered visuals, there is a speed penalty compared to a fully native visual. The visual will take some time to load. Multiple visuals on the same page will slow loading down further - try to limit the number of visuals per page. 
+
+The visual manually needs to be updated when the NHS-R making data count package is published - therefore, the most recent features and bugfixes from that visual may not be available.
+
+# Additional features
+
+## Filtering
+
+The visual works with inbuilt PowerBI filtering options. 
+
+![](https://github.com/Bergam0t/nhs_ptd_power_bi/assets/29951987/64c08f30-86e3-46e0-81a4-7a1242cae94f)
+
+
+## Zero padding
+
+An option to zero-pad values allows for better handling of datasets where missing values for months should be interpreted as 0 rather than skipped in calculations. 
+
+![](https://github.com/Bergam0t/nhs_ptd_power_bi/assets/29951987/0b3ca4f5-bd23-4e54-87dc-a6ebb9f35f42)
+
+
+# Known bugs
+
+There is a known bug where 'NA' is appended to titles in faceted plots. This is on the list to be fixed
+
+Sometimes within-graph titles will not appear despite 'title settings - display title?' being ticked. Turning the switch off and back on again tends to fix this.
 
 # Information for Collaborators
 
